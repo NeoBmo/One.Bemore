@@ -14,8 +14,13 @@
 }
 
 ::-webkit-scrollbar {
-  width: 0;
+  width: 10px;
   background-color: var(--gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #2a2a2a;
+  border: 2px solid var(--gray);
 }
 
 html {
@@ -32,6 +37,21 @@ body {
   overflow-wrap: break-word;
   color: var(--gray-light);
   line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 ::selection {
@@ -64,18 +84,15 @@ table {
 img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
 }
 
 code {
   padding: 5px;
   background-color: var(--gray);
-  border-radius: 2px;
 }
 
 pre {
   padding: 1.5em;
-  border-radius: 8px;
 }
 
 pre>code {

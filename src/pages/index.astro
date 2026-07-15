@@ -1,7 +1,6 @@
 ---
 import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
-import ScrollSmootherInit from "../components/ScrollSmootherInit.astro";
 import { SiteDescription, SiteTitleHome } from "../consts";
 ---
 
@@ -12,40 +11,31 @@ import { SiteDescription, SiteTitleHome } from "../consts";
   </head>
   <body>
     <Header />
-    <div id="smooth-wrapper">
-      <div id="smooth-content">
-        <main>
-          <section class="h-screen flex items-center">
-            <div class="w-11/12 mx-auto">
-              <div class="text-center">
-                <h1
-                  class="text-pink-400 text-3xl font-semibold animate-fade-up animate-duration-500 animate-ease-out"
-                >
-                  1% mejor cada día
-                </h1>
-                <p
-                  class="mt-3 text-neutral-100 animate-fade-up animate-duration-500 animate-delay-100 animate-ease-out"
-                >
-                  En este blog, encontrarás herramientas para el aprendizaje
-                  efectivo y el autodidactismo, descubriendo las claves para     F
-                  alcanzar tu máximo potencial.
-                </p>
-                <div
-                  class="mt-4 hover:scale-110 duration-500 ease-out delay-100 animate-fade-up animate-duration-500 animate-delay-150 animate-ease-out"
-                >
-                  <a href="/blog" class="">
-                    <button
-                      class="px-3 py-1 w-fit font-semibold text-pink-400 hover:text-white border border-pink-400 bg-transparent hover:bg-pink-400 rounded-lg hover:scale-110 transition duration-300 ease-out"
-                      >Comenzar</button
-                    >
-                  </a>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
-    </div>
-    <ScrollSmootherInit />
+    <main>
+      <section class="min-h-screen flex items-center py-24 sm:py-28">
+        <div class="w-11/12 max-w-3xl mx-auto">
+          <div class="text-center">
+            <h1
+              class="text-pink-400 text-3xl font-semibold animate-fade-up animate-duration-500 animate-ease-out"
+            >
+              1% mejor cada día
+            </h1>
+            <p
+              class="mt-3 text-neutral-100 animate-fade-up animate-duration-500 animate-delay-100 animate-ease-out"
+            >
+              En este blog, encontrarás herramientas para el aprendizaje
+              efectivo y el autodidactismo, descubriendo las claves para
+              alcanzar tu máximo potencial.
+            </p>
+            <a
+              href="/blog"
+              class="inline-flex items-center justify-center px-3 py-1 mt-6 w-fit text-xl font-semibold underline text-pink-400 hover:scale-110 transition duration-300 ease-in-out animate-fade-up animate-duration-500 animate-delay-200 animate-ease-out"
+            >
+              Comenzar
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
   </body>
 </html>
