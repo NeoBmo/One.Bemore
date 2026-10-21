@@ -10,12 +10,5 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  image: {
-    domains: ["latiendadelcafe.co", "markdownguide.org", "fundacionaquae.org", "www.fundacionaquae.org"],
-    cache: true,
-    cacheDir: "./.cache/images",
-  },
   compressHTML: true,
-  minifyCSS: true,
-  minifyJS: true,
 });
