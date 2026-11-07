@@ -152,6 +152,6 @@ h3 {
   *::before,
   *::after {
     scroll-behavior: auto !important;
-    transition-property: opacity, color, background-color !important;
+    transition-property: opacity !important;
   }
 }

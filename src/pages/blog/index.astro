@@ -32,7 +32,7 @@ const years = groupByYear(posts);
         }
       </div>
     </fieldset>
-    <p class="filters__count" role="status" data-count></p>
+    <p class="filters__count" data-count></p>
   </form>
 
   {
@@ -77,6 +77,11 @@ const years = groupByYear(posts);
     margin-bottom: 2rem;
   }
 
+  /* Sin esto, display: grid gana al atributo hidden y el formulario se ve sin JavaScript. */
+  .filters[hidden] {
+    display: none;
+  }
+
   .filters label,
   .filters legend {
     font-family: var(--font-hand);
@@ -109,10 +114,6 @@ const years = groupByYear(posts);
     border-radius: 999px;
     background: var(--color-paper);
     cursor: pointer;
-    transition:
-      transform var(--duration-press) var(--ease-out),
-      background-color var(--duration-hover) ease,
-      color var(--duration-hover) ease;
   }
 
   .filters__type[aria-pressed='true'] {

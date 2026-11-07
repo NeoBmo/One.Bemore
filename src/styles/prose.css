@@ -20,7 +20,6 @@
 .prose a {
   color: var(--color-accent);
   text-decoration-thickness: 1px;
-  transition: text-decoration-thickness var(--duration-hover) ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -64,6 +63,21 @@
   border: 1px solid var(--color-dot);
   border-radius: 4px;
   font-size: 0.92em;
+}
+
+/* Paleta del resaltado de código: solo negro, tinta y rosado. */
+.prose {
+  --astro-code-background: var(--color-paper);
+  --astro-code-foreground: var(--color-ink);
+  --astro-code-token-keyword: var(--color-accent);
+  --astro-code-token-constant: var(--color-accent);
+  --astro-code-token-string: #f9a8d4;
+  --astro-code-token-string-expression: #f9a8d4;
+  --astro-code-token-comment: #c2779f;
+  --astro-code-token-function: var(--color-ink);
+  --astro-code-token-parameter: var(--color-ink);
+  --astro-code-token-punctuation: var(--color-ink);
+  --astro-code-token-link: var(--color-accent);
 }
 
 .prose pre {

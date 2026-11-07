@@ -18,7 +18,7 @@ const { title, description, pubDate, type, series } = post.data;
     <span>{series ? `${POST_TYPES[type].label} · ${series}` : POST_TYPES[type].label}</span>
   </p>
   <h3 class="post-row__title" style={`view-transition-name: ${titleTransition(post)}`}>
-    <a href={postUrl(post)}>{title}</a>
+    <a href={postUrl(post)}><span class="post-row__label">{title}</span></a>
   </h3>
   <p class="post-row__summary">{description}</p>
 </article>
@@ -42,19 +42,23 @@ const { title, description, pubDate, type, series } = post.data;
   }
 
   .post-row__title a {
-    display: inline-block;
     text-decoration: none;
-    transition: transform var(--duration-hover) var(--ease-out);
   }
 
-  /* El enlace cubre toda la fila para que el área de clic sea generosa. */
+  /* El enlace no se transforma: así su ::after sigue cubriendo toda la fila. */
   .post-row__title a::after {
     content: '';
     position: absolute;
     inset: 0;
   }
 
-  .post-row__title a::before {
+  .post-row__label {
+    position: relative;
+    display: inline-block;
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .post-row__label::before {
     content: '→';
     position: absolute;
     left: -1.4em;
@@ -67,17 +71,17 @@ const { title, description, pubDate, type, series } = post.data;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .post-row:hover .post-row__title a {
+    .post-row:hover .post-row__label {
       transform: translateX(6px);
     }
 
-    .post-row:hover .post-row__title a::before {
+    .post-row:hover .post-row__label::before {
       opacity: 1;
       transform: none;
     }
   }
 
-  .post-row:has(a:focus-visible) .post-row__title a {
+  .post-row:has(a:focus-visible) .post-row__label {
     transform: translateX(6px);
   }
 

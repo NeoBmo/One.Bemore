@@ -7,6 +7,8 @@ export default defineConfig({
   site: process.env.SITE_URL || 'https://one-bmore-blog.workers.dev',
   integrations: [mdx(), sitemap()],
   redirects: { '/about': '/sobre-mi/' },
+  // El tema por variables deja los colores del código en manos de prose.css.
+  markdown: { shikiConfig: { theme: 'css-variables' } },
   compressHTML: true,
   fonts: [
     {

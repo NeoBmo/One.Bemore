@@ -62,21 +62,19 @@ const { title, description, pubDate, type, series, order, note } = post.data;
         )
       }
 
-      <section id="comentarios" class="thread" aria-labelledby="thread-title">
-        <h2 id="thread-title" class="visually-hidden">Última anotación y comentarios</h2>
-        {
-          note && (
+      {/* Los comentarios llegan en la rama feat/comments y colgarán de esta sección. */}
+      {
+        note && (
+          <section id="comentarios" class="thread" aria-labelledby="thread-title">
+            <h2 id="thread-title" class="visually-hidden">Última anotación</h2>
             <div class="thread__note">
               <p class="thread__label">Última anotación</p>
               <p>{note}</p>
               <p class="thread__signature">— {SITE.author}</p>
             </div>
-          )
-        }
-        <div class="thread__replies" data-comments={post.id}>
-          <p>Los comentarios abren pronto.</p>
-        </div>
-      </section>
+          </section>
+        )
+      }
     </footer>
   </article>
 </Page>
@@ -169,11 +167,6 @@ const { title, description, pubDate, type, series, order, note } = post.data;
   .thread__signature {
     color: var(--color-accent);
     font-family: var(--font-hand);
-  }
-
-  .thread__replies {
-    margin-top: 2rem;
-    font-size: var(--text-sm);
   }
 
   .visually-hidden {

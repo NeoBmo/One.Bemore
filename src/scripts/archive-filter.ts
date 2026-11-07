@@ -51,4 +51,6 @@ export const initArchiveFilter = () => {
 
   form.hidden = false;
   apply();
+  // Se anuncia solo lo que cambia tras una interacción, no el conteo inicial.
+  count?.setAttribute('aria-live', 'polite');
 };
