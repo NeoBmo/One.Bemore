@@ -1,3 +1,15 @@
-export const SiteTitle = 'Blog';
-export const SiteTitleHome = 'Inicio';
-export const SiteDescription = 'Una de las sensaciones más gratificantes en mi día a día es la de aprender, y este espacio está destinado a conservar y compartir lo más valioso de mis descubrimientos.';
+export const SITE = {
+  name: 'one.bmore',
+  author: 'Luis',
+  description:
+    'Un cuaderno abierto: reflexiones, historias, curiosidades con contexto y enseñanzas que vale la pena conservar.',
+} as const;
+
+export const POST_TYPES = {
+  reflexion: 'Reflexión',
+  historia: 'Historia',
+  curiosidad: 'Curiosidad',
+  ensenanza: 'Enseñanza',
+} as const;
+
+export type PostType = keyof typeof POST_TYPES;

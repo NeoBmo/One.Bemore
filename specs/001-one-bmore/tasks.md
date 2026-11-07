@@ -22,8 +22,8 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | T1 | Eliminar artefactos anteriores | `chore/reset-base` | Limpieza | implementada |
 | T2 | Planificación y documento del proyecto | `chore/reset-base` | Retoma | implementada |
 | T3 | Quitar Tailwind y actualizar dependencias | `chore/reset-base` | Identidad | implementada |
-| T4 | Tokens, fuentes y estilos base | `feat/visual-identity` | RF-23 | pendiente |
-| T5 | Fondo de puntos con parallax y luz | `feat/visual-identity` | RF-18 a RF-21 | pendiente |
+| T4 | Tokens, fuentes y estilos base | `feat/visual-identity` | RF-23 | implementada |
+| T5 | Fondo de puntos con parallax y luz | `feat/visual-identity` | RF-18 a RF-21 | implementada |
 | T6 | Esquema y lógica de artículos con tests | `feat/site-pages` | RF-01 a RF-09 | pendiente |
 | T7 | Inicio, cabecera y pie | `feat/site-pages` | RF-11, RF-16 | pendiente |
 | T8 | Archivo con búsqueda y filtro | `feat/site-pages` | RF-12 a RF-15 | pendiente |

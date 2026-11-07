@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
@@ -7,4 +7,24 @@ export default defineConfig({
   site: process.env.SITE_URL || 'https://one-bmore-blog.workers.dev',
   integrations: [mdx(), sitemap()],
   compressHTML: true,
+  fonts: [
+    {
+      provider: fontProviders.fontsource(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-reading',
+      weights: [400, 700],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['monospace'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Shantell Sans',
+      cssVariable: '--font-hand',
+      weights: [400, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['cursive'],
+    },
+  ],
 });

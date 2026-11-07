@@ -1,36 +1,35 @@
 ---
-import "../styles/global.css";
+import { Font } from 'astro:assets';
+import { SITE } from '../consts';
+import '../styles/base.css';
+
 interface Props {
   title: string;
   description: string;
-  image?: string;
+  type?: 'website' | 'article';
 }
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const { title, description, image = "/logo.svg" } = Astro.props;
+
+const { title, description, type = 'website' } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const pageTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
 ---
 
 <meta charset="utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="keywords" content="Blog, Aprendizaje, Desarrollo, Programación, Salud mental" />
-<meta name="robots" content="index, follow" />
-<meta name="generator" content={Astro.generator} />
-<meta name="title" content={title} />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#000000" />
+<title>{pageTitle}</title>
 <meta name="description" content={description} />
-<meta property="og:type" content="website" />
-<meta property="og:url" content={canonicalURL} />
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image, Astro.site)} />
-<meta property="og:site_name" content="Blog RockOraboloco" />
+<link rel="canonical" href={canonicalUrl} />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.name} />
 <meta property="og:locale" content="es_CO" />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={description} />
 
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={title} />
-<meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={new URL(image, Astro.site)} />
-
-<link rel="canonical" href={canonicalURL} />
-<link rel="icon" type="image/svg+icon" href="/favicon.svg" />
-<title>{title}</title>
+<Font cssVariable="--font-reading" preload />
+<Font cssVariable="--font-hand" />

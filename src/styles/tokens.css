@@ -1,0 +1,25 @@
+:root {
+  color-scheme: dark;
+
+  --color-paper: #000;
+  --color-ink: #fff0f6;
+  --color-accent: #f472b6;
+  --color-dot: #7a3860;
+
+  --dot-period: 28px;
+
+  --text-sm: 0.875rem;
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
+  --text-title: clamp(2.5rem, 1.9rem + 3vw, 4.25rem);
+
+  --space-gutter: clamp(1.25rem, 0.8rem + 2.2vw, 2.5rem);
+  --space-section: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
+
+  --measure: 68ch;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-press: 140ms;
+  --duration-hover: 220ms;
+}
