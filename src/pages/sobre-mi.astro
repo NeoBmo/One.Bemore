@@ -1,0 +1,54 @@
+---
+import Page from '../layouts/Page.astro';
+import '../styles/prose.css';
+---
+
+<Page title="Sobre mí" description="Quién escribe one.bmore y cómo está hecho este cuaderno.">
+  <header class="about__header">
+    <h1 class="rise">Lo que me impulsó a seguir</h1>
+  </header>
+
+  <div class="prose">
+    <p>
+      Después de graduarme, sentí la incertidumbre de lo que sería de mi futuro. No sabía qué estudiar ni en qué
+      invertir mi tiempo. Casi por inercia, acepté estudiar algo que no buscaba, y realmente fue emocionante intentar
+      algo diferente. El siguiente año, 2020, no fue nada como lo planeado.
+    </p>
+    <p>
+      Mis padres, a quienes les debo todo, me dieron las herramientas para seguir aprendiendo. A pesar de la
+      adversidad, traté de ser cada día mejor, y al final rindió fruto todo el esfuerzo. No existe sacrificio más
+      grande.
+    </p>
+    <p>
+      Pasaron muchas cosas, pero, como mis maestros me enseñaron, yo solo debía seguir, persistir e insistir. Es
+      sorprendente lo mucho que puedes superar con esa mentalidad, pero lo que realmente aprendí de ellos fue que el
+      regalo más grande que te pueden dar es una pizca de esperanza. Con lo poco que sea, somos capaces de ser mejores.
+    </p>
+    <p>
+      Este es solo el principio de mi camino. Me falta mucho por aprender y tengo mucho que enseñar. Tengo una misión:
+      ser mejor cada día. Cada instante es una oportunidad, y existen personas que creen en mí. A todos aquellos, les
+      digo gracias por cambiar mi vida.
+    </p>
+
+    <h2>Cómo está hecho</h2>
+    <p>
+      Cada artículo es un archivo Markdown. El sitio lo genera <a href="https://astro.build">Astro</a> como páginas
+      estáticas, con CSS escrito a mano y sin librerías de interfaz. El texto usa JetBrains Mono y los títulos, Shantell
+      Sans.
+    </p>
+    <p>
+      El fondo es una hoja negra perforada sobre una luz rosada. Al hacer scroll solo se mueve un periodo de la
+      cuadrícula, y como se repite, parece infinito. Si prefieres menos movimiento, el fondo se queda quieto.
+    </p>
+  </div>
+</Page>
+
+<style>
+  .about__header {
+    padding-block: clamp(2rem, 5vw, 4rem) 2rem;
+  }
+
+  .about__header h1 {
+    font-size: var(--text-title);
+  }
+</style>

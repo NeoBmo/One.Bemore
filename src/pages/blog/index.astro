@@ -1,0 +1,140 @@
+---
+import PostRow from '../../components/PostRow.astro';
+import { POST_TYPES, POST_TYPE_KEYS } from '../../consts';
+import Page from '../../layouts/Page.astro';
+import { getPosts } from '../../lib/blog';
+import { groupByYear } from '../../lib/posts';
+
+const posts = await getPosts();
+const years = groupByYear(posts);
+---
+
+<Page title="Archivo" description="Todos los artículos de one.bmore, por año, nombre y tipo.">
+  <header class="archive__header">
+    <h1 class="rise">Archivo</h1>
+    <p class="rise" style="--order: 1">Todo lo escrito, del más reciente al más antiguo.</p>
+  </header>
+
+  <!-- Sin JavaScript el formulario queda oculto y se ve la lista completa. -->
+  <form class="filters" data-filters hidden role="search" aria-label="Filtrar artículos">
+    <label for="search">Buscar por nombre</label>
+    <input id="search" type="search" name="q" autocomplete="off" spellcheck="false" />
+    <fieldset>
+      <legend>Tipo</legend>
+      <div class="filters__types">
+        <button class="filters__type press" type="button" data-type="" aria-pressed="true">Todo</button>
+        {
+          POST_TYPE_KEYS.map((key) => (
+            <button class="filters__type press" type="button" data-type={key} aria-pressed="false">
+              {POST_TYPES[key].plural}
+            </button>
+          ))
+        }
+      </div>
+    </fieldset>
+    <p class="filters__count" role="status" data-count></p>
+  </form>
+
+  {
+    years.length === 0 ? (
+      <p>Todavía no hay artículos publicados.</p>
+    ) : (
+      years.map((group) => (
+        <section class="year" data-year>
+          <h2>{group.year}</h2>
+          <ul>
+            {group.posts.map((post) => (
+              <li data-post data-title={post.data.title} data-type={post.data.type}>
+                <PostRow post={post} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    )
+  }
+  <p class="archive__empty" data-empty hidden>Nada por aquí con esa búsqueda. Prueba otra palabra.</p>
+</Page>
+
+<script>
+  import { initArchiveFilter } from '../../scripts/archive-filter';
+
+  initArchiveFilter();
+</script>
+
+<style>
+  .archive__header {
+    padding-block: clamp(2rem, 5vw, 4rem) 2rem;
+  }
+
+  .archive__header h1 {
+    font-size: var(--text-title);
+  }
+
+  .filters {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .filters label,
+  .filters legend {
+    font-family: var(--font-hand);
+    font-weight: 700;
+  }
+
+  .filters input {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border: 1px dashed var(--color-accent);
+    border-radius: 6px;
+    background: var(--color-paper);
+  }
+
+  .filters fieldset {
+    padding: 0;
+    border: 0;
+  }
+
+  .filters__types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .filters__type {
+    padding: 0.3rem 0.9rem;
+    border: 1px solid var(--color-accent);
+    border-radius: 999px;
+    background: var(--color-paper);
+    cursor: pointer;
+    transition:
+      transform var(--duration-press) var(--ease-out),
+      background-color var(--duration-hover) ease,
+      color var(--duration-hover) ease;
+  }
+
+  .filters__type[aria-pressed='true'] {
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  .filters__count {
+    font-size: var(--text-sm);
+  }
+
+  .year + .year {
+    margin-top: 2.5rem;
+  }
+
+  .year h2 {
+    color: var(--color-accent);
+    font-size: var(--text-xl);
+  }
+
+  .year ul {
+    padding: 0;
+    list-style: none;
+  }
+</style>

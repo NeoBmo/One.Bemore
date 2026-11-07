@@ -34,7 +34,7 @@ cuentas de usuario y funciones de IA dentro del blog.
 - RF-05: CUANDO un artículo tenga `series`, EL SISTEMA enlazará la lección anterior y la siguiente según `order`.
 - RF-06: EL SISTEMA mostrará título y fecha de creación en cada artículo.
 - RF-07: CUANDO un commit cambie un artículo en un día posterior a `pubDate`, EL SISTEMA mostrará la fecha de edición.
-- RF-08: SI el commit incluye `[sin-edicion]`, ENTONCES EL SISTEMA no lo contará como edición.
+- RF-08: SI el commit incluye `[sin-edicion]` o es anterior al 2026-11-08, ENTONCES EL SISTEMA no lo contará como edición.
 - RF-09: SI existe `updatedDate` en el frontmatter, ENTONCES EL SISTEMA la usará en lugar de la fecha de git.
 - RF-10: CUANDO un artículo tenga `note`, EL SISTEMA la mostrará al pie como «Última anotación», firmada por Luis.
 

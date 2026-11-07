@@ -2,6 +2,7 @@
 title: 'El poder de los Habitos atómicos'
 description: 'Este es lo que aprendí de este maravilloso libro. Ojalá lo hubiera leído antes.'
 pubDate: 'Nov 22 2023'
+type: reflexion
 ---
 
 En "Hábitos Atómicos" de James Clear. Se explora la ciencia de la formación de hábitos, revelando cómo las decisiones minúsculas, los hábitos atómicos, pueden transformar radicalmente tu vida. Desde la psicología hasta la neurociencia, el autor desentraña los secretos detrás de la construcción de hábitos positivos y cómo romper con los perjudiciales.

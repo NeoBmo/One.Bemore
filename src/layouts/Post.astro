@@ -1,0 +1,213 @@
+---
+import { POST_TYPES, SITE } from '../consts';
+import { postUrl, titleTransition, type Post } from '../lib/blog';
+import { formatDate } from '../lib/posts';
+import '../styles/prose.css';
+import Page from './Page.astro';
+
+interface Props {
+  post: Post;
+  edited?: Date;
+  previous?: Post;
+  next?: Post;
+}
+
+const { post, edited, previous, next } = Astro.props;
+const { title, description, pubDate, type, series, order, note } = post.data;
+---
+
+<Page title={title} description={description} type="article">
+  <div class="reading-progress" aria-hidden="true"></div>
+  <article class="post">
+    <header class="post__header">
+      <p class="post__type">
+        <a class="ink-link" href={`/blog/?tipo=${type}`}>{POST_TYPES[type].label}</a>
+        {series && <span>· {series}, lección {order}</span>}
+      </p>
+      <h1 style={`view-transition-name: ${titleTransition(post)}`}>{title}</h1>
+      <p class="post__dates">
+        Escrito el <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        {
+          edited && (
+            <>
+              <span aria-hidden="true"> · </span>editado el{' '}
+              <time datetime={edited.toISOString()}>{formatDate(edited)}</time>
+            </>
+          )
+        }
+      </p>
+    </header>
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    <footer class="post__footer">
+      {
+        (previous || next) && (
+          <nav class="post__nav" aria-label={series ? `Lecciones de ${series}` : 'Más artículos'}>
+            {previous && (
+              <a class="post__nav-link press" href={postUrl(previous)} rel="prev">
+                <span>{series ? 'Lección anterior' : 'Anterior'}</span>
+                {previous.data.title}
+              </a>
+            )}
+            {next && (
+              <a class="post__nav-link post__nav-link--next press" href={postUrl(next)} rel="next">
+                <span>{series ? 'Lección siguiente' : 'Siguiente'}</span>
+                {next.data.title}
+              </a>
+            )}
+          </nav>
+        )
+      }
+
+      <section id="comentarios" class="thread" aria-labelledby="thread-title">
+        <h2 id="thread-title" class="visually-hidden">Última anotación y comentarios</h2>
+        {
+          note && (
+            <div class="thread__note">
+              <p class="thread__label">Última anotación</p>
+              <p>{note}</p>
+              <p class="thread__signature">— {SITE.author}</p>
+            </div>
+          )
+        }
+        <div class="thread__replies" data-comments={post.id}>
+          <p>Los comentarios abren pronto.</p>
+        </div>
+      </section>
+    </footer>
+  </article>
+</Page>
+
+<style>
+  .post__header {
+    padding-block: clamp(2rem, 5vw, 4rem) 2.5rem;
+  }
+
+  .post__type {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+  }
+
+  .post__header h1 {
+    margin-top: 0.5rem;
+    font-size: var(--text-title);
+  }
+
+  .post__dates {
+    margin-top: 1rem;
+    font-size: var(--text-sm);
+  }
+
+  .post__footer {
+    margin-top: var(--space-section);
+  }
+
+  .post__nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    padding-block: 2rem;
+    border-block: 1px dashed var(--color-dot);
+  }
+
+  .post__nav-link {
+    display: grid;
+    gap: 0.25rem;
+    font-family: var(--font-hand);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .post__nav-link span {
+    color: var(--color-accent);
+    font-family: var(--font-reading);
+    font-size: var(--text-sm);
+    font-weight: 400;
+  }
+
+  .post__nav-link--next {
+    text-align: right;
+  }
+
+  /* La anotación es la raíz del hilo: los comentarios cuelgan de su línea. */
+  .thread {
+    margin-top: 3rem;
+    padding-left: 1.5rem;
+    border-left: 2px dashed var(--color-accent);
+  }
+
+  .thread__note {
+    position: relative;
+  }
+
+  .thread__note::before {
+    content: '';
+    position: absolute;
+    top: 0.55em;
+    left: calc(-1.5rem - 7px);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  .thread__label {
+    font-family: var(--font-hand);
+    font-size: var(--text-lg);
+    font-weight: 700;
+  }
+
+  .thread__note > p + p {
+    margin-top: 0.75rem;
+  }
+
+  .thread__signature {
+    color: var(--color-accent);
+    font-family: var(--font-hand);
+  }
+
+  .thread__replies {
+    margin-top: 2rem;
+    font-size: var(--text-sm);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Barra de lectura en el hilo del compositor, sin JavaScript. */
+  .reading-progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 5;
+    height: 3px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reading-progress {
+        animation: reading-progress linear both;
+        animation-timeline: scroll(root);
+      }
+
+      @keyframes reading-progress {
+        to {
+          transform: scaleX(1);
+        }
+      }
+    }
+  }
+</style>

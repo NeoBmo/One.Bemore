@@ -6,6 +6,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: process.env.SITE_URL || 'https://one-bmore-blog.workers.dev',
   integrations: [mdx(), sitemap()],
+  redirects: { '/about': '/sobre-mi/' },
   compressHTML: true,
   fonts: [
     {

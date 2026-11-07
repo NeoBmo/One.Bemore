@@ -24,11 +24,11 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | T3 | Quitar Tailwind y actualizar dependencias | `chore/reset-base` | Identidad | implementada |
 | T4 | Tokens, fuentes y estilos base | `feat/visual-identity` | RF-23 | implementada |
 | T5 | Fondo de puntos con parallax y luz | `feat/visual-identity` | RF-18 a RF-21 | implementada |
-| T6 | Esquema y lógica de artículos con tests | `feat/site-pages` | RF-01 a RF-09 | pendiente |
-| T7 | Inicio, cabecera y pie | `feat/site-pages` | RF-11, RF-16 | pendiente |
-| T8 | Archivo con búsqueda y filtro | `feat/site-pages` | RF-12 a RF-15 | pendiente |
-| T9 | Artículo, anotación y series | `feat/site-pages` | RF-05 a RF-10, RF-22 | pendiente |
-| T10 | Sobre mí, 404, RSS y redirección | `feat/site-pages` | RF-16, RF-17 | pendiente |
+| T6 | Esquema y lógica de artículos con tests | `feat/site-pages` | RF-01 a RF-09 | implementada |
+| T7 | Inicio, cabecera y pie | `feat/site-pages` | RF-11, RF-16 | implementada |
+| T8 | Archivo con búsqueda y filtro | `feat/site-pages` | RF-12 a RF-15 | implementada |
+| T9 | Artículo, anotación y series | `feat/site-pages` | RF-05 a RF-10, RF-22 | implementada |
+| T10 | Sobre mí, 404, RSS y redirección | `feat/site-pages` | RF-16, RF-17 | implementada |
 | T11 | Dominio de comentarios con tests | `feat/comments` | RF-25 a RF-31 | pendiente |
 | T12 | Migración y RLS en Supabase | `feat/comments` | RF-33 | pendiente |
 | T13 | Adaptador, Actions y Turnstile | `feat/comments` | RF-26, RF-27, RF-33 | pendiente |

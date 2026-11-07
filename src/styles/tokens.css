@@ -4,7 +4,7 @@
   --color-paper: #000;
   --color-ink: #fff0f6;
   --color-accent: #f472b6;
-  --color-dot: #7a3860;
+  --color-dot: #6a3154;
 
   --dot-period: 28px;
 
@@ -17,7 +17,7 @@
   --space-gutter: clamp(1.25rem, 0.8rem + 2.2vw, 2.5rem);
   --space-section: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
 
-  --measure: 68ch;
+  --measure: 42rem;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-press: 140ms;

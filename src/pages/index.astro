@@ -1,14 +1,83 @@
 ---
+import PostRow from '../components/PostRow.astro';
+import { POST_TYPES, POST_TYPE_KEYS, SITE } from '../consts';
 import Page from '../layouts/Page.astro';
-import { SITE } from '../consts';
+import { getPosts } from '../lib/blog';
+
+const latest = (await getPosts()).slice(0, 3);
 ---
 
 <Page title={SITE.name} description={SITE.description}>
-  <h1 class="rise" style="font-size: var(--text-title); padding-block: 6rem 2rem;">one.bmore</h1>
-  <p class="rise" style="--order: 1">
-    Muestra de identidad. El texto largo usa JetBrains Mono: <a href="#muestra">un enlace</a>,
-    <strong>una palabra fuerte</strong> y <em>una cursiva</em>, con tildes, eñes y signos: ¿qué tal, mañana?
-  </p>
-  <p style="padding-block: 2rem"><a id="muestra" class="ink-link press" href="#contenido">Enlace con trazo</a></p>
-  {Array.from({ length: 12 }, (_, index) => <p style="padding-block: 2.5rem">Párrafo {index + 1} para probar cómo los puntos se quedan atrás mientras el texto pasa cerca.</p>)}
+  <section class="intro" aria-labelledby="intro-title">
+    <h1 id="intro-title" class="rise">Un cuaderno abierto.</h1>
+    <p class="intro__lead rise" style="--order: 1">
+      Aquí guardo lo que aprendo y lo que no dejo de pensar. No es un feed ni una lista de consejos:
+      son textos escritos con calma, para leer sin prisa y volver a ellos.
+    </p>
+    <dl class="intro__types rise" style="--order: 2">
+      {
+        POST_TYPE_KEYS.map((key) => (
+          <div>
+            <dt>
+              <a class="ink-link" href={`/blog/?tipo=${key}`}>{POST_TYPES[key].plural}</a>
+            </dt>
+            <dd>{POST_TYPES[key].summary}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="latest" aria-labelledby="latest-title">
+    <h2 id="latest-title">Lo último</h2>
+    {
+      latest.length > 0 ? (
+        latest.map((post) => <PostRow post={post} />)
+      ) : (
+        <p>Todavía no hay artículos publicados. El primero está en camino.</p>
+      )
+    }
+    <p class="latest__more">
+      <a class="ink-link press" href="/blog/">Ver todos los artículos</a>
+    </p>
+  </section>
 </Page>
+
+<style>
+  .intro {
+    padding-block: clamp(2.5rem, 6vw, 5rem) var(--space-section);
+  }
+
+  .intro h1 {
+    font-size: var(--text-title);
+  }
+
+  .intro__lead {
+    margin-top: 1.25rem;
+    font-size: var(--text-lg);
+    line-height: 1.6;
+  }
+
+  .intro__types {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .intro__types dt {
+    font-family: var(--font-hand);
+    font-weight: 700;
+  }
+
+  .intro__types a {
+    color: var(--color-accent);
+  }
+
+  .latest h2 {
+    font-size: var(--text-xl);
+  }
+
+  .latest__more {
+    margin-top: 1.5rem;
+  }
+</style>

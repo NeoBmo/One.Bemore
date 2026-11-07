@@ -1,0 +1,46 @@
+---
+import Logo from './Logo.astro';
+
+const links = [
+  { href: '/blog/', label: 'Archivo' },
+  { href: '/sobre-mi/', label: 'Sobre mí' },
+];
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || (href === '/blog/' && path.startsWith('/blog/'));
+---
+
+<header class="site-header wrap">
+  <Logo />
+  <nav aria-label="Principal">
+    <ul>
+      {
+        links.map((link) => (
+          <li>
+            <a class="ink-link" href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding-block: 1.75rem;
+  }
+
+  ul {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+</style>

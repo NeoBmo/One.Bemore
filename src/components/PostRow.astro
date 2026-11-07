@@ -1,0 +1,87 @@
+---
+import { POST_TYPES } from '../consts';
+import { postUrl, titleTransition, type Post } from '../lib/blog';
+import { formatDate } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, type, series } = post.data;
+---
+
+<article class="post-row">
+  <p class="post-row__meta">
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{series ? `${POST_TYPES[type].label} · ${series}` : POST_TYPES[type].label}</span>
+  </p>
+  <h3 class="post-row__title" style={`view-transition-name: ${titleTransition(post)}`}>
+    <a href={postUrl(post)}>{title}</a>
+  </h3>
+  <p class="post-row__summary">{description}</p>
+</article>
+
+<style>
+  .post-row {
+    position: relative;
+    padding-block: 1.25rem;
+  }
+
+  .post-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+  }
+
+  .post-row__title {
+    font-size: var(--text-lg);
+  }
+
+  .post-row__title a {
+    display: inline-block;
+    text-decoration: none;
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  /* El enlace cubre toda la fila para que el área de clic sea generosa. */
+  .post-row__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .post-row__title a::before {
+    content: '→';
+    position: absolute;
+    left: -1.4em;
+    color: var(--color-accent);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+      opacity var(--duration-hover) ease,
+      transform var(--duration-hover) var(--ease-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .post-row:hover .post-row__title a {
+      transform: translateX(6px);
+    }
+
+    .post-row:hover .post-row__title a::before {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .post-row:has(a:focus-visible) .post-row__title a {
+    transform: translateX(6px);
+  }
+
+  .post-row__summary {
+    margin-top: 0.35rem;
+  }
+</style>
