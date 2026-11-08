@@ -1,4 +1,4 @@
-import { reviewBody } from './moderation.ts';
+import { reviewAlias, reviewBody } from './moderation.ts';
 import { aliasFromHash, hashToken, isHash, issueToken, verifyToken } from './token.ts';
 import { LIMITS, isShown, type CommentStatus, type CommentStore, type StoredComment } from './types.ts';
 import { validateDraft, type CommentDraft, type DraftError } from './validate.ts';
@@ -68,15 +68,16 @@ export const postComment = async (store: CommentStore, draft: CommentDraft, ctx:
   const hasToken = await verifyToken(draft.token, ctx.tokenSecret);
   const newToken = hasToken ? undefined : await issueToken(ctx.tokenSecret);
 
-  // Un bot rellenó el campo trampa. Se comprueba al final, después de validar y del límite,
-  // para que su respuesta sea indistinguible de un éxito real.
-  if (String(draft.honeypot ?? '').trim()) return { ok: true, id: ctx.newId(), status: 'visible', token: newToken };
-
-  const tokenHash = await hashToken(newToken ?? (draft.token as string));
-  // El alias también se modera: es texto público y no admite enlaces.
-  const flagged = reviewBody(body).length > 0 || (alias !== '' && reviewBody(alias, 0).length > 0);
+  // El alias también se modera: es texto público y no admite enlaces ni palabras de la lista.
+  const flagged = reviewBody(body).length > 0 || (alias !== '' && reviewAlias(alias).length > 0);
   const status: CommentStatus = flagged ? 'quarantined' : 'visible';
   const id = ctx.newId();
+
+  // Un bot rellenó el campo trampa. Se comprueba al final, después de validar, del límite
+  // y de moderar, para que su respuesta (estado incluido) sea igual a la de un envío real.
+  if (checked.value.honeypot.trim()) return { ok: true, id, status, token: newToken };
+
+  const tokenHash = await hashToken(newToken ?? (draft.token as string));
 
   await store.insert({
     id,

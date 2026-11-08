@@ -4,8 +4,9 @@ import { LIMITS } from './types.ts';
 
 export type ReviewReason = 'links' | 'banned-word' | 'shouting' | 'repeated';
 
-// Cada «http://» o «www.» cuenta, aunque vengan pegados uno tras otro.
-const SCHEME = /https?:\/\/|www\./gi;
+// Cada enlace cuenta una vez: «https://www.» es uno solo, pero dos enlaces pegados
+// uno tras otro («https://a.com/https://b.com») cuentan dos.
+const SCHEME = /https?:\/\/(?:www\.)?|www\./gi;
 const SCHEMED_URL = /(?:https?:\/\/|www\.)[^\s,]*/gi;
 // Dominios sin http ni www («casino.com», «bit.ly/x»). El dominio final va en minúsculas
 // a propósito: así «Gracias.Me gustó» o «ASP.NET» no cuentan. La etiqueta necesita una
@@ -37,12 +38,20 @@ const isShouting = (text: string) => {
 };
 
 // Devuelve los motivos para enviar a cuarentena; una lista vacía significa publicar.
-// El alias admite cero enlaces; el cuerpo, como máximo uno.
-export const reviewBody = (text: string, maxLinks: number = LIMITS.maxLinks): ReviewReason[] => {
+export const reviewBody = (text: string): ReviewReason[] => {
   const reasons: ReviewReason[] = [];
-  if (countLinks(text) > maxLinks) reasons.push('links');
+  if (countLinks(text) > LIMITS.maxLinks) reasons.push('links');
   if (hasBannedWord(text)) reasons.push('banned-word');
   if (isShouting(text)) reasons.push('shouting');
   if (REPEATED.test(text.normalize('NFKC'))) reasons.push('repeated');
+  return reasons;
+};
+
+// El alias es un nombre: no admite enlaces ni palabras de la lista, pero sí mayúsculas
+// («MARIA FERNANDA GONZALEZ») y letras repetidas en apodos.
+export const reviewAlias = (alias: string): ReviewReason[] => {
+  const reasons: ReviewReason[] = [];
+  if (countLinks(alias) > 0) reasons.push('links');
+  if (hasBannedWord(alias)) reasons.push('banned-word');
   return reasons;
 };

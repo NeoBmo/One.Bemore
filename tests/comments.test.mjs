@@ -74,7 +74,7 @@ test('un padre vacío se trata como comentario raíz', () => {
 
 test('no se puede suplantar al autor, al blog ni a otros lectores', () => {
   const impostors = [
-    'Lector-1A2B', 'Iector-AB12', 'Lеctor-AB12', 'Luis', 'L\u200Buis', 'ＬＵＩＳ',
+    'Lector-1A2B3C', 'Iector-AB12CD', 'Lеctor-AB12', 'Luis', 'L\u200Buis', 'ＬＵＩＳ',
     'Luіs', 'Luis (autor)', 'Luis - autor del blog', 'LuisBMO', 'NeoBmo', 'one.bmore', 'One.Bemore', 'admin',
   ];
   for (const alias of impostors) assert.equal(validateDraft(draft({ alias })).error, 'alias-reserved', alias);
@@ -279,7 +279,7 @@ test('solo quien comentó puede borrar, y deja de mostrarse', async () => {
   assert.equal((await del(await reader())).error, 'forbidden');
   assert.equal((await del(author.token)).ok, true);
   assert.equal((await store.getById(author.id)).authorDeleted, true);
-  assert.deepEqual(buildThread(store.comments, []), []);
+  assert.deepEqual(buildThread(store.comments, {}), []);
 });
 
 test('lo que el autor borró en revisión nunca se publica, aunque Luis lo apruebe', async () => {
@@ -288,7 +288,7 @@ test('lo que el autor borró en revisión nunca se publica, aunque Luis lo aprue
   assert.equal((await deleteOwnComment(store, { commentId: author.id, token: author.token, tokenSecret: SECRET })).ok, true);
   assert.equal((await store.getById(author.id)).status, 'quarantined');
   await store.setStatus(author.id, 'visible');
-  assert.deepEqual(buildThread(store.comments, []), []);
+  assert.deepEqual(buildThread(store.comments, {}), []);
 });
 
 test('no se puede responder ni votar un comentario borrado por su autor', async () => {
@@ -317,22 +317,21 @@ const stored = (id, parentId, extra = {}) => ({
 
 test('arma ramas, ordena por votos y luego por antigüedad', () => {
   const comments = [stored('a', null), stored('b', null, { createdAt: '2026-11-08T09:00:00Z' }), stored('c', 'a')];
-  const roots = buildThread(comments, [{ commentId: 'a', voterHash: 'x', value: 1 }]);
+  const roots = buildThread(comments, { a: 1 });
   assert.deepEqual(roots.map((c) => c.id), ['a', 'b']);
   assert.equal(roots[0].score, 1);
   assert.equal(roots[0].replies[0].depth, 1);
 });
 
 test('los votos negativos ordenan pero nunca ocultan', () => {
-  const votes = [1, 2, 3].map((n) => ({ commentId: 'a', voterHash: `v${n}`, value: -1 }));
-  const roots = buildThread([stored('a', null)], votes);
+  const roots = buildThread([stored('a', null)], { a: -3 });
   assert.equal(roots.length, 1);
   assert.equal(roots[0].score, -3);
 });
 
 test('un borrado con respuestas deja su lugar y su texto desaparece', () => {
   for (const extra of [{ status: 'deleted' }, { authorDeleted: true }]) {
-    const roots = buildThread([stored('a', null, extra), stored('b', 'a')], [], 'h-a');
+    const roots = buildThread([stored('a', null, extra), stored('b', 'a')], {}, 'h-a');
     assert.equal(roots[0].removed, true);
     assert.equal(roots[0].body, null);
     assert.equal(roots[0].alias, null);
@@ -342,15 +341,15 @@ test('un borrado con respuestas deja su lugar y su texto desaparece', () => {
 });
 
 test('un oculto sin respuestas visibles desaparece del todo', () => {
-  assert.deepEqual(buildThread([stored('a', null, { status: 'hidden' })], []), []);
+  assert.deepEqual(buildThread([stored('a', null, { status: 'hidden' })], {}), []);
 });
 
 test('la cuarentena oculta el comentario y toda su rama', () => {
-  assert.deepEqual(buildThread([stored('a', null, { status: 'quarantined' }), stored('b', 'a')], []), []);
+  assert.deepEqual(buildThread([stored('a', null, { status: 'quarantined' }), stored('b', 'a')], {}), []);
 });
 
 test('nunca expone hashes ni IP, y marca los comentarios propios', () => {
-  const [root] = buildThread([stored('a', null)], [], 'h-a');
+  const [root] = buildThread([stored('a', null)], {}, 'h-a');
   assert.equal(root.mine, true);
   assert.equal('authorTokenHash' in root, false);
   assert.equal('ipHash' in root, false);
@@ -359,7 +358,7 @@ test('nunca expone hashes ni IP, y marca los comentarios propios', () => {
 
 test('la sangría se detiene en el nivel 3', () => {
   const chain = ['a', 'b', 'c', 'd', 'e', 'f'].map((id, i, all) => stored(id, i === 0 ? null : all[i - 1]));
-  let node = buildThread(chain, [])[0];
+  let node = buildThread(chain, {})[0];
   while (node.replies.length) node = node.replies[0];
   assert.equal(node.depth, 5);
   assert.equal(node.indent, 3);
@@ -367,5 +366,74 @@ test('la sangría se detiene en el nivel 3', () => {
 
 test('una cadena enorme editada a mano no rompe el armado', () => {
   const chain = Array.from({ length: 20000 }, (_, i) => stored(`n${i}`, i === 0 ? null : `n${i - 1}`));
-  assert.doesNotThrow(() => buildThread(chain, []));
+  assert.doesNotThrow(() => buildThread(chain, {}));
+});
+
+// --- Cuarta revisión ---
+
+test('un enlace con www cuenta una sola vez', () => {
+  assert.equal(countLinks('Mira este video https://www.youtube.com/watch?v=abc'), 1);
+  assert.deepEqual(reviewBody('Mira este video https://www.youtube.com/watch?v=abc'), []);
+  assert.deepEqual(reviewBody('http://www.ejemplo.es'), []);
+  assert.equal(countLinks('https://a.com/https://b.com'), 2);
+});
+
+test('verbos comunes no van a cuarentena', () => {
+  assert.deepEqual(reviewBody('Si apuestas por la constancia, ganas'), []);
+});
+
+test('el alias puede ir en mayúsculas o parecerse a «lector» sin imitar al automático', () => {
+  for (const alias of ['MARIA FERNANDA GONZALEZ', 'Lector Café', 'Lector 2025', 'Lector-1A2B']) {
+    assert.equal(validateDraft(draft({ alias })).ok, true, alias);
+  }
+});
+
+test('un alias en mayúsculas no envía el comentario a cuarentena', async () => {
+  const store = new InMemoryCommentStore();
+  assert.equal((await postComment(store, draft({ alias: 'MARIA FERNANDA GONZALEZ' }), ctx())).status, 'visible');
+});
+
+test('las letras parecidas no sirven para suplantar', () => {
+  for (const alias of ['NeoBm0', 'Luıs', 'NeoBmᴏ', 'ꓡuis', 'Lսis']) {
+    assert.equal(validateDraft(draft({ alias })).error, 'alias-reserved', alias);
+  }
+});
+
+test('el campo trampa devuelve el mismo estado que tendría el envío real', async () => {
+  const store = new InMemoryCommentStore();
+  const fake = await postComment(store, draft({ honeypot: 'x', body: 'idiota https://a.com https://b.com' }), ctx());
+  assert.equal(fake.status, 'quarantined');
+  assert.equal(store.comments.length, 0);
+});
+
+test('las etiquetas invisibles sueltas se quitan; las banderas válidas se conservan', () => {
+  const hidden = '\u{1F3F4}\u{E0049}\u{E0047}\u{E004E}\u{E004F}\u{E0052}\u{E0045}\u{E0020}\u{E0041}\u{E004C}\u{E004C}';
+  assert.equal(cleanText(`hola ${hidden}`), 'hola \u{1F3F4}');
+  const scotland = '\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}';
+  assert.equal(cleanText(scotland), scotland);
+});
+
+test('lo que no es texto se rechaza en lugar de convertirse', () => {
+  assert.equal(validateDraft(draft({ body: ['ho', 'la'] })).error, 'invalid-input');
+  assert.equal(validateDraft(draft({ parentId: ['c1'] })).error, 'invalid-input');
+  assert.equal(validateDraft(draft({ alias: { toString: () => 'Ana' } })).error, 'invalid-input');
+});
+
+test('una rama bajo un comentario retirado queda cerrada', () => {
+  const roots = buildThread([stored('a', null, { status: 'deleted' }), stored('b', 'a'), stored('c', 'b'), stored('d', null)], {});
+  const byId = Object.fromEntries(roots.map((root) => [root.id, root]));
+  assert.equal(byId.a.locked, true);
+  assert.equal(byId.a.replies[0].locked, true);
+  assert.equal(byId.a.replies[0].replies[0].locked, true);
+  assert.equal(byId.d.locked, false);
+});
+
+test('el almacén entrega puntuaciones, nunca los votos de cada lector', async () => {
+  const store = new InMemoryCommentStore();
+  const author = await postComment(store, draft(), ctx());
+  await vote(store, { commentId: author.id, value: 1, token: await reader() });
+  await vote(store, { commentId: author.id, value: 1, token: await reader(), ipHash: IP_C });
+  const listed = await store.listByPost('habitos');
+  assert.deepEqual(listed.scores, { [author.id]: 2 });
+  assert.equal('votes' in listed, false);
 });

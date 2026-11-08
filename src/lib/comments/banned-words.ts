@@ -19,5 +19,4 @@ export const BANNED_WORDS = [
   // Spam habitual
   'casino',
   'viagra',
-  'apuestas',
 ] as const;

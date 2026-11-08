@@ -5,8 +5,9 @@
 const PICTO = '\\p{Extended_Pictographic}';
 // La unión de emojis (U+200D) solo tiene sentido entre dos pictogramas, como en 👩\u200D💻.
 const STRAY_JOINER = new RegExp(`(?<!${PICTO}[\\uFE0F\\u{1F3FB}-\\u{1F3FF}]?)\\u200D|\\u200D(?!${PICTO})`, 'gu');
-// Las etiquetas Unicode solo se conservan detrás de la bandera negra: forman banderas como la de Escocia.
-const STRAY_TAG = /(?<!\u{1F3F4}[\u{E0020}-\u{E007F}]*)[\u{E0020}-\u{E007F}]/gu;
+// Las etiquetas Unicode solo se conservan dentro de una bandera de subdivisión válida
+// (🏴 + 2 a 6 letras o cifras + cierre), como la de Escocia. Sueltas servirían para esconder texto.
+const TAG_OR_FLAG = /(\u{1F3F4}[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]{2,6}\u{E007F})|[\u{E0020}-\u{E007F}]/gu;
 // Formato invisible (bidi, anchura cero, BOM), salvo la unión y las etiquetas, que se tratan aparte.
 const INVISIBLE_FORMAT = /(?![\u200D\u{E0020}-\u{E007F}])\p{Cf}/gu;
 // Controles C0 salvo el salto de línea, DEL y controles C1.
@@ -23,7 +24,7 @@ export const cleanText = (text: string): string =>
     .replace(/\r\n?|[\u2028\u2029]/g, '\n')
     .replace(/\t/g, ' ')
     .replace(STRAY_JOINER, '')
-    .replace(STRAY_TAG, '')
+    .replace(TAG_OR_FLAG, (_match, flag?: string) => flag ?? '')
     .replace(INVISIBLE_FORMAT, '')
     .replace(CONTROL, '')
     .replace(BLANK_FILLERS, '')

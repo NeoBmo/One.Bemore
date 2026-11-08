@@ -72,11 +72,10 @@ Postgres, no en JavaScript, y el adaptador de Supabase debe usarlas.
 | Votos solo de +1 o -1 | `CHECK (value IN (-1, 1))` |
 | Sin autovoto | `toggle_vote` compara `voter_hash` con `author_token_hash` e `ip_hash` del autor |
 | Límite de votos por IP | `toggle_vote`: 60 votos por IP en 10 min |
-| Borrado solo de lo visible y propio | `UPDATE ... SET status = 'deleted' WHERE id = $1 AND author_token_hash = $2 AND status = 'visible'` |
 | Estados válidos | `CHECK (status IN ('visible','quarantined','hidden','deleted'))` |
 | Padre del mismo artículo | Clave foránea compuesta `(parent_id, post_slug)` → `(id, post_slug)` |
 | Longitud del texto | `CHECK (char_length(body) BETWEEN 2 AND 2000)`, en puntos de código como el dominio |
-| Puntuación | Vista con la suma de votos: el servidor no recibe los `voter_hash` |
+| Puntuación | Vista con la suma de votos por comentario: `listByPost` devuelve `scores`, nunca los `voter_hash` |
 | Acceso | RLS activo y sin políticas públicas; solo la clave secreta del servidor escribe |
 | Borrado por el autor | Columna `author_deleted boolean`; `UPDATE ... SET author_deleted = true WHERE id = $1 AND author_token_hash = $2` |
 | Rama abierta al votar | `toggle_vote` comprueba con un CTE recursivo que ningún ancestro esté oculto, en cuarentena o borrado |

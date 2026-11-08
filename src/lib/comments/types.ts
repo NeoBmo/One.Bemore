@@ -48,6 +48,9 @@ export interface PublicComment {
   alias: string | null;
   body: string | null;
   removed: boolean;
+  // Rama cerrada: el comentario o un ancestro fue retirado. Se puede leer, pero
+  // la interfaz no ofrece votar ni responder, porque el servidor lo rechazaría.
+  locked: boolean;
   score: number;
   createdAt: string;
   mine: boolean;
@@ -57,7 +60,9 @@ export interface PublicComment {
 }
 
 export interface CommentStore {
-  listByPost(postSlug: string): Promise<{ comments: StoredComment[]; votes: Vote[] }>;
+  // Devuelve la suma de votos por comentario, no los votos: el servidor nunca ve
+  // quién votó qué al pintar el hilo.
+  listByPost(postSlug: string): Promise<{ comments: StoredComment[]; scores: Record<string, number> }>;
   getById(id: string): Promise<StoredComment | undefined>;
   insert(comment: StoredComment): Promise<void>;
   setStatus(id: string, status: CommentStatus): Promise<void>;
