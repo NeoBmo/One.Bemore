@@ -1,41 +1,109 @@
 ---
-import BaseHead from "../components/BaseHead.astro";
-import Header from "../components/Header.astro";
-import { SiteDescription, SiteTitleHome } from "../consts";
+import PostRow from '../components/PostRow.astro';
+import { SITE } from '../consts';
+import Page from '../layouts/Page.astro';
+import { getPosts } from '../lib/blog';
+
+const latest = (await getPosts()).slice(0, 3);
 ---
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <BaseHead title={SiteTitleHome} description={SiteDescription} />
-  </head>
-  <body>
-    <Header />
-    <main>
-      <section class="min-h-screen flex items-center py-24 sm:py-28">
-        <div class="w-11/12 max-w-3xl mx-auto">
-          <div class="text-center">
-            <h1
-              class="text-pink-400 text-3xl font-semibold animate-fade-up animate-duration-500 animate-ease-out"
-            >
-              1% mejor cada día
-            </h1>
-            <p
-              class="mt-3 text-neutral-100 animate-fade-up animate-duration-500 animate-delay-100 animate-ease-out"
-            >
-              En este blog, encontrarás herramientas para el aprendizaje
-              efectivo y el autodidactismo, descubriendo las claves para
-              alcanzar tu máximo potencial.
-            </p>
-            <a
-              href="/blog"
-              class="inline-flex items-center justify-center px-3 py-1 mt-6 w-fit text-xl font-semibold underline text-pink-400 hover:scale-110 transition duration-300 ease-in-out animate-fade-up animate-duration-500 animate-delay-200 animate-ease-out"
-            >
-              Comenzar
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
-  </body>
-</html>
+<Page title={SITE.name} description={SITE.description} header="home" footer>
+  <section class="intro">
+    <h1>Un cuaderno abierto.</h1>
+    <p class="intro__lead">{SITE.description}</p>
+  </section>
+
+  <!-- Los artículos esperan detrás de una flecha: quien llega lee primero qué es esto. -->
+  <details class="latest">
+    <summary class="latest__toggle press">
+      <span>Lo último</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+    </summary>
+    <div class="latest__list">
+      {
+        latest.length > 0 ? (
+          latest.map((post) => <PostRow post={post} />)
+        ) : (
+          <p>Todavía no hay artículos publicados. El primero está en camino.</p>
+        )
+      }
+      <p class="latest__more">
+        <a class="ink-link" href="/blog/">Ver todo el archivo</a>
+      </p>
+    </div>
+  </details>
+</Page>
+
+<style>
+  .intro {
+    padding-block: clamp(3rem, 8vw, 6rem) 2.5rem;
+  }
+
+  .intro h1 {
+    font-size: var(--text-title);
+  }
+
+  .intro__lead {
+    margin-top: 1rem;
+    max-width: 34ch;
+    color: var(--color-muted);
+    font-size: var(--text-lg);
+    line-height: 1.5;
+  }
+
+  .latest__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-block: 0.5rem;
+    font-weight: 700;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .latest__toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .latest__toggle svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 2;
+    stroke-linecap: square;
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  /* La flecha gira hacia abajo al abrir: indica que el contenido está debajo. */
+  .latest[open] .latest__toggle svg {
+    transform: rotate(90deg);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .latest:not([open]) .latest__toggle:hover svg {
+      transform: translateX(4px);
+    }
+  }
+
+  .latest__list {
+    margin-top: 1rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .latest[open] .latest__list {
+      animation: unfold 280ms var(--ease-out);
+    }
+
+    @keyframes unfold {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+    }
+  }
+
+  .latest__more {
+    margin-top: 1.25rem;
+  }
+</style>

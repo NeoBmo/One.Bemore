@@ -1,0 +1,197 @@
+---
+const TRAIL_SIZE = 16;
+---
+
+<div class="dot-field" aria-hidden="true">
+  <div class="dot-field__glow" data-dot-glow></div>
+  <div class="dot-field__pulse" data-dot-pulse></div>
+  {Array.from({ length: TRAIL_SIZE }, () => <div class="dot-field__mark" data-dot-mark></div>)}
+  <div class="dot-field__sheet" data-dot-sheet></div>
+</div>
+
+<style>
+  /* Capas: color muy tenue, luces que pasan y una hoja negra perforada en cada punto.
+     Solo se mueven las luces y la hoja, así que el navegador no repinta. */
+  .dot-field {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    contain: strict;
+    background: var(--color-dot);
+
+    /* Como una lámpara: el centro brilla en el rosado de la marca y se apaga
+       hacia tonos más oscuros antes de fundirse con la hoja. */
+    --dot-light: radial-gradient(
+      circle closest-side,
+      var(--light-core) 0%,
+      var(--light-core) 18%,
+      var(--light-mid) 45%,
+      var(--light-edge) 72%,
+      transparent 100%
+    );
+  }
+
+  .dot-field__glow,
+  .dot-field__pulse,
+  .dot-field__mark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .dot-field__glow {
+    width: 11rem;
+    height: 11rem;
+    margin: -5.5rem 0 0 -5.5rem;
+    background: var(--dot-light);
+    transition: opacity 400ms ease;
+  }
+
+  .dot-field__glow[data-active] {
+    opacity: 1;
+  }
+
+  /* La onda del clic nace del tamaño de la luz y se abre hasta casi triplicarlo. */
+  .dot-field__pulse {
+    width: 11rem;
+    height: 11rem;
+    margin: -5.5rem 0 0 -5.5rem;
+    background: var(--dot-light);
+  }
+
+  .dot-field__mark {
+    width: 7rem;
+    height: 7rem;
+    margin: -3.5rem 0 0 -3.5rem;
+    background: var(--dot-light);
+  }
+
+  .dot-field__sheet {
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(100% + var(--dot-period));
+    /* Dos franjas negras, una vertical y otra horizontal: solo queda abierto
+       el cuadrado donde ambas dejan hueco. Con píxeles enteros el borde es nítido. */
+    background-image:
+      linear-gradient(to right, transparent var(--dot-size), var(--color-paper) var(--dot-size)),
+      linear-gradient(to bottom, transparent var(--dot-size), var(--color-paper) var(--dot-size));
+    background-size: var(--dot-period) var(--dot-period);
+    background-position: calc((var(--dot-period) - var(--dot-size)) / 2) calc((var(--dot-period) - var(--dot-size)) / 2);
+    will-change: transform;
+  }
+</style>
+
+<script>
+  import { dotOffset, follow, shouldMark, type Point } from '../lib/dot-field';
+
+  const sheet = document.querySelector<HTMLElement>('[data-dot-sheet]');
+  const glow = document.querySelector<HTMLElement>('[data-dot-glow]');
+  const pulse = document.querySelector<HTMLElement>('[data-dot-pulse]');
+  const marks = [...document.querySelectorAll<HTMLElement>('[data-dot-mark]')];
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+
+  let scrollFrame = 0;
+  let glowFrame = 0;
+  let nextMark = 0;
+  let lastMark: Point | undefined;
+  const light = { x: 0, y: 0, targetX: 0, targetY: 0, placed: false };
+
+  const paintSheet = () => {
+    scrollFrame = 0;
+    if (!sheet) return;
+    // Redondeado a píxel entero para que los cuadrados no se vean borrosos al moverse.
+    const offset = reducedMotion.matches ? 0 : Math.round(dotOffset(window.scrollY));
+    sheet.style.transform = `translate3d(0, ${offset}px, 0)`;
+  };
+
+  const requestSheet = () => {
+    scrollFrame ||= requestAnimationFrame(paintSheet);
+  };
+
+  // El rastro reutiliza un número fijo de luces: la más antigua se recicla.
+  const leaveMark = (point: Point) => {
+    if (reducedMotion.matches || !shouldMark(lastMark, point)) return;
+    lastMark = point;
+    const mark = marks[nextMark];
+    nextMark = (nextMark + 1) % marks.length;
+    if (!mark) return;
+    mark.getAnimations().forEach((animation) => animation.cancel());
+    mark.style.transform = `translate3d(${point.x}px, ${point.y}px, 0)`;
+    mark.animate(
+      [
+        { opacity: 1, transform: `translate3d(${point.x}px, ${point.y}px, 0) scale(1)` },
+        { opacity: 0, transform: `translate3d(${point.x}px, ${point.y}px, 0) scale(0.6)` },
+      ],
+      { duration: 1600, easing: 'cubic-bezier(0.33, 0, 0.67, 1)' },
+    );
+  };
+
+  const paintGlow = () => {
+    light.x = follow(light.x, light.targetX);
+    light.y = follow(light.y, light.targetY);
+    if (glow) glow.style.transform = `translate3d(${light.x}px, ${light.y}px, 0)`;
+    const settled = light.x === light.targetX && light.y === light.targetY;
+    glowFrame = settled ? 0 : requestAnimationFrame(paintGlow);
+  };
+
+  // Ratón: una luz principal que sigue con inercia, más el rastro.
+  const onPointerMove = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' || reducedMotion.matches || !finePointer.matches || !glow) return;
+    light.targetX = event.clientX;
+    light.targetY = event.clientY;
+    if (!light.placed) {
+      light.x = light.targetX;
+      light.y = light.targetY;
+      light.placed = true;
+    }
+    glow.dataset.active = '';
+    glowFrame ||= requestAnimationFrame(paintGlow);
+    leaveMark({ x: event.clientX, y: event.clientY });
+  };
+
+  // Táctil: el dedo deja rastro incluso mientras desplaza la página.
+  const onTouch = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (touch) leaveMark({ x: touch.clientX, y: touch.clientY });
+  };
+
+  // Clic o toque: la luz se abre como una onda y se apaga. Un clic nuevo reinicia la onda.
+  const onPress = (event: PointerEvent) => {
+    if (reducedMotion.matches || !pulse || !event.isPrimary) return;
+    const at = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+    pulse.getAnimations().forEach((animation) => animation.cancel());
+    // La onda se abre rápido, pero el brillo se sostiene antes de apagarse:
+    // con una sola curva se apagaría antes de alcanzar a verse.
+    pulse.animate([{ transform: `${at} scale(0.6)` }, { transform: `${at} scale(2.8)` }], {
+      duration: 750,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+    });
+    pulse.animate([{ opacity: 1 }, { opacity: 0.8, offset: 0.4 }, { opacity: 0 }], {
+      duration: 750,
+      easing: 'linear',
+    });
+  };
+
+  const hideGlow = () => {
+    glow?.removeAttribute('data-active');
+    lastMark = undefined;
+  };
+
+  paintSheet();
+  window.addEventListener('scroll', requestSheet, { passive: true });
+  window.addEventListener('pageshow', paintSheet);
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
+  window.addEventListener('pointerdown', onPress, { passive: true });
+  window.addEventListener('touchstart', onTouch, { passive: true });
+  window.addEventListener('touchmove', onTouch, { passive: true });
+  window.addEventListener('touchend', () => (lastMark = undefined), { passive: true });
+  document.documentElement.addEventListener('pointerleave', hideGlow);
+  reducedMotion.addEventListener('change', () => {
+    paintSheet();
+    hideGlow();
+  });
+</script>

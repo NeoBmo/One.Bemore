@@ -2,6 +2,9 @@
 title: 'Introducción a Markdown'
 description: 'Este documento está diseñado para ayudarte a dominar la creación de contenido estructurado y legible utilizando Markdown'
 pubDate: 'Nov 02 2023'
+type: ensenanza
+series: Markdown
+order: 1
 ---
 Markdown es un lenguaje de marcado ligero creado por John Gruber y Aaron Swartz en 2004. La idea detrás de Markdown era simple: diseñar un sistema fácil de entender y usar para dar formato al texto sin necesidad de utilizar un lenguaje más complejo como HTML. El objetivo era permitir que cualquier persona, incluso sin conocimientos técnicos, pudiera crear contenido atractivo y bien formateado.
 

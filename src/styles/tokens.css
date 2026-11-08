@@ -1,0 +1,40 @@
+:root {
+  color-scheme: dark;
+
+  /* Paleta mínima. El texto es blanco roto: el blanco puro «vibra» sobre negro y cansa
+     de noche. El gris marca lo secundario. El rosado aparece solo en lo que se toca. */
+  --color-paper: #000;
+  --color-ink: #ececec; /* 17.1:1 sobre negro */
+  --color-muted: #9a9a9a; /* 7.4:1: fechas, subtítulos y ayudas */
+  --color-accent: #f472b6; /* 7.9:1: enlaces, foco y estados activos */
+  --color-rule: #262626; /* bordes decorativos de tarjetas y separadores */
+  --color-control: #6b6b6b; /* 3.9:1: bordes de controles, por encima del 3:1 de WCAG */
+  --color-dot: #1c1c1c;
+
+  /* Solo para la luz del fondo: el rosado se apaga hacia tonos oscuros, como una lámpara. */
+  --light-core: #f472b6;
+  --light-mid: #c13d80;
+  --light-edge: #682146;
+
+  --dot-period: 28px;
+  --dot-size: 2px;
+
+  --text-sm: 0.875rem;
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
+  --text-title: clamp(2.25rem, 1.75rem + 2.5vw, 3.5rem);
+
+  --space-gutter: clamp(1.25rem, 0.8rem + 2.2vw, 2.5rem);
+  --space-section: clamp(3rem, 2.25rem + 4vw, 5.5rem);
+
+  --measure: 42rem;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-press: 140ms;
+  --duration-hover: 220ms;
+  --duration-page: 320ms;
+
+  /* Solo para bloques de código: la monoespaciada del sistema, sin descargar otra fuente. */
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
+}

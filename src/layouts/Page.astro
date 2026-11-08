@@ -1,0 +1,32 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import DotField from '../components/DotField.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader, { type HeaderVariant } from '../components/SiteHeader.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  type?: 'website' | 'article';
+  header?: HeaderVariant;
+  footer?: boolean;
+}
+
+const { title, description, type, header = 'page', footer = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead title={title} description={description} type={type} />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <DotField />
+    <SiteHeader variant={header} />
+    <main id="contenido" class="wrap">
+      <slot />
+    </main>
+    {footer && <SiteFooter />}
+  </body>
+</html>

@@ -2,6 +2,7 @@
 title: 'Metodología de estudio'
 description: 'Para aprender de manera eficiente, es fundamental contar con un método adecuado. En este breve texto, compartiré algunos métodos que considero especialmente eficaces.'
 pubDate: 'Feb 18 2024'
+type: ensenanza
 ---
 
 La metodología de estudio es la manera en que organizas y llevas a cabo tu proceso de aprendizaje. Incluye técnicas de estudio, planificación del tiempo, recursos utilizados y estrategias para comprender y retener la información.

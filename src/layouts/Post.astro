@@ -1,0 +1,184 @@
+---
+import { POST_TYPES, SITE } from '../consts';
+import { postUrl, titleTransition, type Post } from '../lib/blog';
+import { formatDate, readingMinutes } from '../lib/posts';
+import '../styles/prose.css';
+import Page from './Page.astro';
+
+interface Props {
+  post: Post;
+  edited?: Date;
+  // Solo existen en un mini curso: ahí sí hay una lección que continúa a la anterior.
+  previous?: Post;
+  next?: Post;
+}
+
+const { post, edited, previous, next } = Astro.props;
+const { title, description, pubDate, type, series, order, note } = post.data;
+const minutes = readingMinutes(post.body ?? '');
+---
+
+<Page title={title} description={description} type="article" header="post">
+  <article class="post">
+    <header class="post__header">
+      <p class="post__type">
+        <a class="ink-link" href={`/blog/?tipo=${type}`}>{POST_TYPES[type].label}</a>
+        {series && <span>· {series}, lección {order}</span>}
+      </p>
+      <h1 style={`view-transition-name: ${titleTransition(post)}`}>{title}</h1>
+      <p class="post__meta">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        {
+          edited && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>
+                editado el <time datetime={edited.toISOString()}>{formatDate(edited)}</time>
+              </span>
+            </>
+          )
+        }
+        <span aria-hidden="true">·</span>
+        <span>{minutes} min de lectura</span>
+      </p>
+    </header>
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    <footer class="post__footer">
+      {
+        series && (previous || next) && (
+          <nav class="lessons" aria-label={`Lecciones de ${series}`}>
+            {previous && (
+              <a class="lessons__link press" href={postUrl(previous)} rel="prev">
+                <span>Lección anterior</span>
+                {previous.data.title}
+              </a>
+            )}
+            {next && (
+              <a class="lessons__link lessons__link--next press" href={postUrl(next)} rel="next">
+                <span>Lección siguiente</span>
+                {next.data.title}
+              </a>
+            )}
+          </nav>
+        )
+      }
+
+      {/* Los comentarios colgarán de esta sección, debajo de la última anotación. */}
+      {
+        note && (
+          <section id="comentarios" class="thread" aria-labelledby="thread-title">
+            <h2 id="thread-title" class="visually-hidden">Última anotación</h2>
+            <div class="thread__note">
+              <p class="thread__label">Última anotación</p>
+              <p>{note}</p>
+              <p class="thread__signature">— {SITE.author}</p>
+            </div>
+          </section>
+        )
+      }
+    </footer>
+  </article>
+</Page>
+
+<style>
+  .post__header {
+    padding-block: clamp(2rem, 5vw, 4rem) 2.5rem;
+  }
+
+  .post__type {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .post__header h1 {
+    margin-top: 0.5rem;
+    font-size: var(--text-title);
+  }
+
+  .post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    margin-top: 1rem;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .post__footer {
+    margin-top: var(--space-section);
+  }
+
+  .lessons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    padding-block: 2rem;
+    border-block: 1px solid var(--color-rule);
+  }
+
+  .lessons__link {
+    display: grid;
+    gap: 0.25rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .lessons__link span {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    font-weight: 400;
+  }
+
+  .lessons__link--next {
+    text-align: right;
+  }
+
+  /* La anotación es la raíz del hilo: los comentarios cuelgan de su línea. */
+  .thread {
+    margin-top: 3rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--color-rule);
+  }
+
+  .thread__note {
+    position: relative;
+  }
+
+  .thread__note::before {
+    content: '';
+    position: absolute;
+    top: 0.6em;
+    left: calc(-1.5rem - 4px);
+    width: 7px;
+    height: 7px;
+    background: var(--color-muted);
+    transform: rotate(45deg);
+  }
+
+  .thread__label {
+    font-weight: 700;
+  }
+
+  .thread__note > p + p {
+    margin-top: 0.75rem;
+  }
+
+  .thread__signature {
+    color: var(--color-muted);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

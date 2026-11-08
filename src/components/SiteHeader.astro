@@ -1,0 +1,77 @@
+---
+import Logo from './Logo.astro';
+
+export type HeaderVariant = 'home' | 'page' | 'post';
+
+interface Props {
+  variant: HeaderVariant;
+}
+
+const { variant } = Astro.props;
+
+const links = [
+  { href: '/blog/', label: 'Archivo' },
+  { href: '/sobre-mi/', label: 'Sobre mí' },
+];
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || (href === '/blog/' && path.startsWith('/blog/'));
+---
+
+{
+  variant === 'post' ? (
+    // En un artículo la cabecera se hace pequeña: el texto es el protagonista.
+    <header class="site-header site-header--post wrap">
+      <Logo size="small" />
+      <a class="ink-link site-header__back" href="/blog/">
+        Archivo
+      </a>
+    </header>
+  ) : (
+    <header class:list={['site-header', 'wrap', { 'site-header--home': variant === 'home' }]}>
+      <Logo />
+      <nav aria-label="Principal">
+        <ul>
+          {links.map((link) => (
+            <li>
+              <a class="ink-link" href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+  )
+}
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding-block: 1.75rem;
+  }
+
+  .site-header--home {
+    padding-block: 2.5rem 1rem;
+  }
+
+  .site-header--post {
+    padding-block: 1.25rem;
+    font-size: var(--text-sm);
+  }
+
+  .site-header__back {
+    color: var(--color-muted);
+  }
+
+  ul {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+</style>

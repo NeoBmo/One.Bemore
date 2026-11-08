@@ -1,118 +1,83 @@
-# Blog RockOraboloco
+# One.Bemore
 
-Blog personal centrado en aprendizaje, autodidactismo y mejora continua.
+Un cuaderno abierto: lo que aprendo y lo que no dejo de pensar, escrito con calma para
+leer sin prisa.
 
-## Historia breve
+Es un blog personal a la antigua con una interfaz moderna. Cada artículo es un archivo
+Markdown, y el sitio se genera como páginas estáticas.
 
-Este proyecto nacio como un blog personal para documentar ideas, aprendizajes y procesos de crecimiento tecnico y personal. La version activa se desarrolla desde la identidad actual de GitHub, `NeoBmo`, pero la publicacion final mantiene el repositorio historico que conserva la integracion con Netlify y el historial publico del sitio.
+## Escribir un artículo
 
-## Filosofia de diseno
+Crea un archivo en `src/content/blog/`. El nombre del archivo es la dirección:
+`mi-articulo.md` se publica en `/blog/mi-articulo/`.
 
-- Minimalista y editorial.
-- Foco en legibilidad, jerarquia tipografica y ritmo visual.
-- Animacion funcional, no decorativa.
-- Contenido primero, interfaz al servicio del texto.
-- Experiencia responsiva con una sola linea visual consistente.
-
-## Tecnologias utilizadas
-
-- Astro 6
-- TypeScript
-- Tailwind CSS 4
-- MDX
-- RSS con `@astrojs/rss`
-- Sitemap con `@astrojs/sitemap`
-- GSAP, reservado para animaciones puntuales del sitio
-
-## Caracteristicas principales
-
-- Generacion estatica.
-- Sistema de blog basado en colecciones de contenido.
-- SEO base con metadatos Open Graph, Twitter Cards y sitemap.
-- Navegacion simple y rapida.
-- Diseno responsive con soporte para pantallas pequenas y grandes.
-- Animaciones ligeras y controladas.
-- RSS disponible para sindicacion.
-
-## Estructura del proyecto
-
-```text
-src/
-  content/
-    blog/          Articulos del blog en Markdown o MDX
-    config.ts      Esquema de contenido
-  components/      Componentes reutilizables
-  layouts/         Layouts de paginas y articulos
-  pages/           Rutas publicas
-  styles/          Estilos globales
-  ui/              Piezas de UI aisladas
-  utils/           Funciones de dominio y helpers
-public/            Activos estaticos
-dist/              Salida generada por build
+```yaml
+---
+title: 'Título del artículo'
+description: 'Una o dos líneas para la tarjeta y los buscadores.'
+pubDate: 'Nov 08 2026'
+type: reflexion # reflexion | historia | curiosidad | ensenanza
+note: 'Última anotación: aparece al pie y abre el hilo de comentarios.' # opcional
+series: 'Markdown' # opcional, para mini cursos
+order: 1 # obligatorio si hay series
+draft: false # true lo oculta en producción
+---
 ```
 
-## Instalacion
+- **Fecha de edición:** se calcula sola desde git. Si un commit no es una edición real del
+  contenido, añade `[sin-edicion]` a su mensaje. Para fijarla a mano, usa `updatedDate`.
+- **Citas:** las notas al pie de Markdown (`[^1]`) se muestran al final del artículo.
+- **Mini cursos:** los artículos con el mismo `series` se enlazan con «Lección anterior» y
+  «Lección siguiente», según su `order`.
 
-```bash
-npm install
-```
+## Comandos
 
-## Scripts disponibles
+| Comando | Qué hace |
+|---|---|
+| `npm install` | Instala las dependencias |
+| `npm run dev` | Servidor local en `http://localhost:4321` |
+| `npm run test` | Tests de la lógica (artículos, fondo y comentarios) |
+| `npm run lint` | Revisión de tipos con `astro check` |
+| `npm run build` | Genera el sitio en `dist/` |
 
-- `npm run dev` - inicia el servidor de desarrollo.
-- `npm run start` - alias de desarrollo.
-- `npm run lint` - ejecuta `astro check`.
-- `npm run build` - genera la version de produccion.
-- `npm run preview` - previsualiza el build localmente.
-- `npm run astro` - acceso directo al CLI de Astro.
+Requiere Node 24 o superior.
 
-## Metricas relevantes
+## Cómo está hecho
 
-- Build estatica: completada sin errores.
-- `astro check`: 0 errores, 0 warnings, 0 hints.
-- Rutas generadas: 6 paginas publicas.
-- Tamano total del artefacto `dist/`: 86,829 bytes.
-- Sitio optimizado para entrega liviana, sin runtime complejo en cliente.
+- **Astro 7** genera páginas estáticas. La única pieza de servidor será la de comentarios.
+- **CSS propio**, sin librerías de interfaz, con los tokens en `src/styles/tokens.css`.
+- **Una sola fuente:** iA Writer Quattro, autoalojada por la API de fuentes de Astro.
+- **Paleta mínima:** negro, texto blanco roto, gris para lo secundario y rosado solo en lo
+  que se puede tocar.
+- **El fondo** es una hoja negra perforada sobre luces rosadas. Al hacer scroll solo se
+  mueve un periodo de la cuadrícula, y como se repite, parece infinito. El ratón y el dedo
+  encienden los puntos que tocan, y un clic abre una onda de luz.
+- **Entre páginas**, el fondo y la cabecera se quedan quietos y la hoja viaja: hacia
+  adelante entra por la derecha y al volver por la izquierda. Usa View Transitions nativas.
+- **Movimiento reducido:** si el sistema lo pide, no hay desplazamientos, solo fundidos.
 
-## Estado actual
+## Comentarios (en construcción)
 
-Estado del proyecto: listo para preproduccion.
+Anónimos, con ramas, votos y moderación. La lógica ya está escrita y probada en
+`src/lib/comments/`; falta conectarla a Supabase y Cloudflare.
 
-Puntos validos para la release actual:
+- **Token firmado:** cada lector recibe un token firmado por el servidor, y en la base de
+  datos solo se guarda su hash.
+- **Filtros:** lo sospechoso va a cuarentena y Luis decide.
+- **Hilo:** los votos ordenan, nunca ocultan.
 
-- `npm run build` finaliza correctamente.
-- `npm run lint` esta disponible y pasa con `astro check`.
-- No hay errores de tipos o de plantillas en Astro.
-- No se detectaron comentarios de desarrollo obsoletos ni imports no usados en el analisis actual.
+## Estructura
 
-## Roadmap
+| Ruta | Contenido |
+|---|---|
+| `src/content/blog/` | Artículos en Markdown |
+| `src/pages/` | Rutas del sitio |
+| `src/components/`, `src/layouts/` | Piezas de interfaz |
+| `src/lib/` | Lógica probada: artículos, fondo y comentarios |
+| `src/styles/` | Tokens y estilos base |
+| `specs/001-one-bmore/` | Especificación, plan y estado de tareas |
+| `tests/` | Tests con `node:test` |
 
-- Unificar y depurar el uso de GSAP para dejar solo animaciones realmente necesarias.
-- Reducir dependencias que no aporten valor directo al sitio.
-- Mejorar microinteracciones sin aumentar el costo de render.
-- Ampliar el sistema editorial con mejores plantillas para articulos.
-- Seguir reforzando accesibilidad semantica y contraste.
-- Revisar la estrategia de imagenes y metadatos por articulo.
+## Créditos
 
-## Despliegue
-
-- Build orientado a Netlify.
-- Salida estatica en `dist/`.
-- Sitemap y RSS generados en build.
-- La variable `SITE_URL` puede usarse para ajustar el dominio publico en `astro.config.mjs`.
-
-## Version 2.0
-
-La version 2.0 representa un rediseno completo del blog con foco en solidez de publicacion y limpieza arquitectonica.
-
-- Rediseno completo de la experiencia visual.
-- Optimizacion del sistema de animaciones para mantenerlas sutiles y controladas.
-- Eliminacion de componentes innecesarios y simplificacion de la estructura.
-- Mejoras de rendimiento en la capa estatica y en la carga inicial.
-- Ajustes responsive para mantener consistencia en desktop y mobile.
-- Mejoras SEO y accesibilidad en metadatos, semantica y navegacion.
-- Preparacion para despliegue en Netlify con salida estatica reproducible.
-
-## Licencia
-
-Proyecto personal. Uso privado salvo que se indique lo contrario.
+El icono y el dibujo de «Sobre mí» son de la hija del autor.

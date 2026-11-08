@@ -1,0 +1,111 @@
+---
+import { POST_TYPES } from '../consts';
+import { postUrl, titleTransition, type Post } from '../lib/blog';
+import { formatDate, readingMinutes } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, type, series } = post.data;
+const minutes = readingMinutes(post.body ?? '');
+---
+
+<!-- Tarjeta: toda la superficie lleva al artículo. El enlace está en el título por
+     accesibilidad y su ::after cubre la tarjeta entera. -->
+<article class="card press">
+  <p class="card__meta">
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{minutes} min</span>
+    <span aria-hidden="true">·</span>
+    <span>{series ? `${POST_TYPES[type].label}, ${series}` : POST_TYPES[type].label}</span>
+  </p>
+  <h2 class="card__title" style={`view-transition-name: ${titleTransition(post)}`}>
+    <a href={postUrl(post)}>{title}</a>
+  </h2>
+  <p class="card__summary">{description}</p>
+  <span class="card__arrow" aria-hidden="true">→</span>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    padding: 1.25rem 3rem 1.25rem 1.25rem;
+    border: 1px solid var(--color-rule);
+    background: var(--color-paper);
+    /* Solo se anima el movimiento; el borde cambia de color al instante. */
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .card + :global(.card) {
+    margin-top: 0.75rem;
+  }
+
+  .card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+
+  .card__title {
+    margin-top: 0.35rem;
+    font-size: var(--text-lg);
+  }
+
+  .card__title a {
+    text-decoration: none;
+  }
+
+  .card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .card__summary {
+    margin-top: 0.35rem;
+  }
+
+  .card__arrow {
+    position: absolute;
+    top: 50%;
+    right: 1.25rem;
+    color: var(--color-accent);
+    opacity: 0;
+    transform: translate(-6px, -50%);
+    transition:
+      opacity var(--duration-hover) ease,
+      transform var(--duration-hover) var(--ease-out);
+  }
+
+  /* En escritorio la tarjeta responde al pasar: sube, se enciende el borde y aparece la flecha. */
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-2px);
+    }
+
+    .card:hover .card__arrow {
+      opacity: 1;
+      transform: translate(0, -50%);
+    }
+  }
+
+  .card:has(a:focus-visible) {
+    border-color: var(--color-accent);
+  }
+
+  .card:has(a:focus-visible) .card__arrow {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+
+  /* Al tocar, la tarjeta se hunde apenas: confirma que respondió. */
+  .card:active {
+    transform: scale(0.99);
+  }
+</style>
