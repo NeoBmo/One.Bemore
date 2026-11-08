@@ -58,7 +58,8 @@ svg {
 }
 
 button,
-input {
+input,
+select {
   color: inherit;
   font: inherit;
 }
