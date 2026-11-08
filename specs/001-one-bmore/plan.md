@@ -57,3 +57,24 @@ comentarios, `@astrojs/cloudflare` 14, `wrangler` y `@supabase/supabase-js`.
 | `?tipo=` inválido | Se ignora y se muestra todo |
 | Sin artículos publicados | Inicio y archivo muestran un mensaje, no una lista vacía rota |
 | Comentario con HTML | Se muestra como texto, nunca se interpreta |
+
+## Contrato de base de datos para comentarios (T12)
+
+La revisión independiente del dominio mostró que «leer y luego escribir» pierde contra
+peticiones simultáneas: 20 envíos a la vez saltaban el límite de 5. Estas reglas viven en
+Postgres, no en JavaScript, y el adaptador de Supabase debe usarlas.
+
+| Regla | Dónde se garantiza |
+|---|---|
+| Límite de 5 comentarios por IP en 10 min | RPC `post_comment`: `pg_advisory_xact_lock(hashtext(ip_hash))`, cuenta, valida la rama e inserta en una transacción |
+| Un voto por lector y comentario | `PRIMARY KEY (comment_id, voter_hash)` |
+| Repetir el voto lo retira | RPC `toggle_vote`: `DELETE ... WHERE value = v RETURNING`; si no borró, `INSERT ... ON CONFLICT DO UPDATE` |
+| Votos solo de +1 o -1 | `CHECK (value IN (-1, 1))` |
+| Sin autovoto | `toggle_vote` compara `voter_hash` con `author_token_hash` e `ip_hash` del autor |
+| Límite de votos por IP | `toggle_vote`: 60 votos por IP en 10 min |
+| Borrado solo de lo visible y propio | `UPDATE ... SET status = 'deleted' WHERE id = $1 AND author_token_hash = $2 AND status = 'visible'` |
+| Estados válidos | `CHECK (status IN ('visible','quarantined','hidden','deleted'))` |
+| Padre del mismo artículo | Clave foránea compuesta `(parent_id, post_slug)` → `(id, post_slug)` |
+| Longitud del texto | `CHECK (char_length(body) BETWEEN 2 AND 2000)`, en puntos de código como el dominio |
+| Puntuación | Vista con la suma de votos: el servidor no recibe los `voter_hash` |
+| Acceso | RLS activo y sin políticas públicas; solo la clave secreta del servidor escribe |

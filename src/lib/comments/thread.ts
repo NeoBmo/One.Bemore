@@ -21,8 +21,11 @@ export const buildThread = (
     children.set(comment.parentId, siblings);
   }
 
+  // El tope de profundidad protege contra datos editados a mano: nunca hay recursión sin fin.
   const build = (parentId: string | null, depth: number): PublicComment[] =>
-    (children.get(parentId) ?? [])
+    depth > LIMITS.maxDepth
+      ? []
+      : (children.get(parentId) ?? [])
       .filter((comment) => comment.status !== 'quarantined')
       .map((comment) => {
         const replies = build(comment.id, depth + 1);

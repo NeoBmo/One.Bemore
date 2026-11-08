@@ -13,6 +13,8 @@ export const LIMITS = {
   rateWindowMs: 10 * 60_000,
   // Niveles de sangría: 0, 1, 2 y 3. Más hondo se muestra al nivel 3.
   maxIndent: 3,
+  // Tope real de respuestas encadenadas: evita ramas infinitas y recursión sin fin.
+  maxDepth: 30,
 } as const;
 
 // Fila tal como vive en la base de datos. Nunca sale al navegador.
