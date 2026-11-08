@@ -62,3 +62,4 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | 2026-11-07 | Astro 7 usa Sätteri: los plugins remark exigen otra dependencia. La fecha de edición se lee desde git en `getStaticPaths` |
 | 2026-11-07 | Siguiente: T11, dominio de comentarios. T12 y T13 esperan cuentas de Luis |
 | 2026-11-07 | Ajustes de Luis: nombre One.Bemore, icono y dibujo de su hija, paleta rosada, sin esquinas redondeadas, rastro táctil, barra reactiva, pie solo en inicio |
+| 2026-11-08 | T11 detenida tras 3 intentos: la revisión final pide 2 cambios importantes (enlace con www contado doble; fila contradictoria en plan.md) y 9 sugerencias. Esperando decisión de Luis |
