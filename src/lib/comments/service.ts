@@ -107,6 +107,7 @@ export const voteComment = async (
   if (!(await verifyToken(input.token, input.tokenSecret))) return { ok: false, error: 'no-token' };
   if (input.value !== 1 && input.value !== -1) return { ok: false, error: 'invalid-vote' };
 
+  if (typeof input.commentId !== 'string') return { ok: false, error: 'not-found' };
   const comment = await store.getById(input.commentId);
   if (!comment || (await openBranchDepth(store, comment)) === undefined) return { ok: false, error: 'not-found' };
 
@@ -129,6 +130,7 @@ export const deleteOwnComment = async (
   store: CommentStore,
   input: { commentId: string; token?: string } & Secrets,
 ): Promise<{ ok: true; error?: undefined } | { ok: false; error: 'not-found' | 'forbidden' }> => {
+  if (typeof input.commentId !== 'string') return { ok: false, error: 'not-found' };
   const comment = await store.getById(input.commentId);
   if (!comment || comment.authorDeleted) return { ok: false, error: 'not-found' };
   if (!(await verifyToken(input.token, input.tokenSecret))) return { ok: false, error: 'forbidden' };

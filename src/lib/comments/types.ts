@@ -51,6 +51,8 @@ export interface PublicComment {
   // Rama cerrada: el comentario o un ancestro fue retirado. Se puede leer, pero
   // la interfaz no ofrece votar ni responder, porque el servidor lo rechazaría.
   locked: boolean;
+  // Falso en ramas cerradas y en el tope de profundidad, donde el servidor rechazaría la respuesta.
+  canReply: boolean;
   score: number;
   createdAt: string;
   mine: boolean;

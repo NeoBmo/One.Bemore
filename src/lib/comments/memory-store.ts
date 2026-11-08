@@ -8,7 +8,8 @@ export class InMemoryCommentStore implements CommentStore {
   async listByPost(postSlug: string) {
     const comments = this.comments.filter((comment) => comment.postSlug === postSlug);
     const ids = new Set(comments.map((comment) => comment.id));
-    const scores: Record<string, number> = {};
+    // Sin prototipo: un id como «constructor» no puede leer una función heredada.
+    const scores: Record<string, number> = Object.create(null);
     for (const vote of this.votes) {
       if (ids.has(vote.commentId)) scores[vote.commentId] = (scores[vote.commentId] ?? 0) + vote.value;
     }

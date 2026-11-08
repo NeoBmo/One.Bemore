@@ -434,6 +434,22 @@ test('el almacén entrega puntuaciones, nunca los votos de cada lector', async (
   await vote(store, { commentId: author.id, value: 1, token: await reader() });
   await vote(store, { commentId: author.id, value: 1, token: await reader(), ipHash: IP_C });
   const listed = await store.listByPost('habitos');
-  assert.deepEqual(listed.scores, { [author.id]: 2 });
+  assert.deepEqual({ ...listed.scores }, { [author.id]: 2 });
   assert.equal('votes' in listed, false);
+});
+
+test('la interfaz sabe dónde no se puede responder', () => {
+  const chain = Array.from({ length: 32 }, (_, i) => stored(`d${i}`, i === 0 ? null : `d${i - 1}`));
+  let node = buildThread(chain, {})[0];
+  while (node.depth < 30) node = node.replies[0];
+  assert.equal(node.locked, false);
+  assert.equal(node.canReply, false);
+  assert.equal(buildThread([stored('a', null)], {})[0].canReply, true);
+});
+
+test('un id raro no rompe las puntuaciones ni los votos', async () => {
+  assert.equal(buildThread([stored('constructor', null)], {})[0].score, 0);
+  const store = new InMemoryCommentStore();
+  assert.equal((await vote(store, { commentId: ['c1'], value: 1, token: await reader() })).error, 'not-found');
+  assert.equal((await deleteOwnComment(store, { commentId: { id: 'c1' }, token: await reader(), tokenSecret: SECRET })).error, 'not-found');
 });
