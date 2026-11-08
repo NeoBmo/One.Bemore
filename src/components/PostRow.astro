@@ -22,9 +22,9 @@ const minutes = readingMinutes(post.body ?? '');
     <span aria-hidden="true">·</span>
     <span>{series ? `${POST_TYPES[type].label}, ${series}` : POST_TYPES[type].label}</span>
   </p>
-  <h3 class="card__title" style={`view-transition-name: ${titleTransition(post)}`}>
+  <h2 class="card__title" style={`view-transition-name: ${titleTransition(post)}`}>
     <a href={postUrl(post)}>{title}</a>
-  </h3>
+  </h2>
   <p class="card__summary">{description}</p>
   <span class="card__arrow" aria-hidden="true">→</span>
 </article>

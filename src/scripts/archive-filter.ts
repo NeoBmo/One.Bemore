@@ -22,7 +22,8 @@ export const initArchiveFilter = () => {
   const params = new URLSearchParams(location.search);
   input.value = params.get('q') ?? '';
   select.value = parseTypeFilter(params.get('tipo')) ?? '';
-  let pages = 1;
+  // Las tandas abiertas viven en el historial: al volver de un artículo la lista sigue igual.
+  let pages = Number(history.state?.archivePages) || 1;
 
   const apply = () => {
     const activeType = parseTypeFilter(select.value);
@@ -44,14 +45,13 @@ export const initArchiveFilter = () => {
     url.searchParams.delete('q');
     if (activeType) url.searchParams.set('tipo', activeType);
     if (input.value.trim()) url.searchParams.set('q', input.value.trim());
-    history.replaceState(history.state, '', url);
+    history.replaceState({ ...history.state, archivePages: pages }, '', url);
   };
 
   const setOpen = (open: boolean) => {
     fields.hidden = !open;
     bar.toggleAttribute('data-open', open);
     toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? 'Cerrar búsqueda' : 'Buscar artículos');
     // El borde arranca del ancho de la lupa y se estira hasta ocupar la fila.
     if (open) bar.style.setProperty('--from', String(toggle.offsetWidth / Math.max(bar.offsetWidth, 1)));
   };

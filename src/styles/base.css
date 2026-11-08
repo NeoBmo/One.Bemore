@@ -167,6 +167,8 @@ main {
 ::view-transition-old(notebook),
 ::view-transition-new(notebook) {
   animation: none;
+  /* Sin fundido, la mezcla por defecto sumaría las dos capas y el fondo brillaría doble. */
+  mix-blend-mode: normal;
 }
 
 @media (prefers-reduced-motion: no-preference) {
