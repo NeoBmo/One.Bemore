@@ -17,7 +17,7 @@ cuentas de usuario y funciones de IA dentro del blog.
 |---|---|
 | Nombre | One.Bemore; el sitio no explica su significado |
 | Color | Negro `#000`, texto `#fff0f6` y escala rosada derivada de `#f472b6`. Sin gris ni esquinas redondeadas |
-| Lectura | JetBrains Mono |
+| Lectura | iA Writer Quattro en el texto; JetBrains Mono en fechas, etiquetas, controles y código |
 | Mano | Shantell Sans provisional en logo, títulos y notas, hasta tener una fuente propia |
 | Logo | La cara del dibujo de su hija como icono; el dibujo completo en `/sobre-mi/` |
 | Fondo | Cuaderno negro de puntos muy tenues, parallax lento y rastro de luz con ratón o dedo |

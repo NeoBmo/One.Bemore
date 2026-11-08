@@ -34,5 +34,5 @@ de contenido, añade `[sin-edicion]` a su mensaje.
 
 ## Hecho con
 
-Astro 7, CSS propio sin librerías de interfaz, JetBrains Mono y Shantell Sans
+Astro 7, CSS propio sin librerías de interfaz, iA Writer Quattro, JetBrains Mono y Shantell Sans
 autoalojadas. El estado del proyecto vive en `specs/001-one-bmore/tasks.md`.

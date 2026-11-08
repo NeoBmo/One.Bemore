@@ -1,4 +1,15 @@
 /* Estilos del texto que llega desde Markdown. */
+.prose {
+  font-family: var(--font-reading);
+  font-size: 1.0625em;
+}
+
+/* El código conserva la monoespaciada: alinear columnas es su trabajo. */
+.prose code,
+.prose pre {
+  font-family: var(--font-mono);
+}
+
 .prose > * + * {
   margin-top: 1.25em;
 }

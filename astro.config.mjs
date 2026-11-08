@@ -10,11 +10,22 @@ export default defineConfig({
   // El tema por variables deja los colores del código en manos de prose.css.
   markdown: { shikiConfig: { theme: 'css-variables' } },
   compressHTML: true,
+  // Tres voces: Quattro para leer, JetBrains Mono para datos y controles,
+  // Shantell Sans para títulos escritos a mano.
   fonts: [
     {
       provider: fontProviders.fontsource(),
-      name: 'JetBrains Mono',
+      name: 'iA Writer Quattro',
       cssVariable: '--font-reading',
+      weights: [400, 700],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-mono',
       weights: [400, 700],
       styles: ['normal', 'italic'],
       subsets: ['latin'],

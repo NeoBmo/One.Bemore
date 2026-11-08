@@ -53,6 +53,7 @@ const latest = (await getPosts()).slice(0, 3);
   }
 
   .intro__lead {
+    font-family: var(--font-reading);
     margin-top: 1.25rem;
     font-size: var(--text-lg);
     line-height: 1.6;
@@ -62,6 +63,10 @@ const latest = (await getPosts()).slice(0, 3);
     display: grid;
     gap: 1rem;
     margin-top: 2.5rem;
+  }
+
+  .intro__types dd {
+    font-family: var(--font-reading);
   }
 
   .intro__types dt {

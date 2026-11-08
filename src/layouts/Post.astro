@@ -126,7 +126,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
 
   .post__nav-link span {
     color: var(--color-meta);
-    font-family: var(--font-reading);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
     font-weight: 400;
   }
@@ -161,6 +161,10 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     font-family: var(--font-hand);
     font-size: var(--text-lg);
     font-weight: 700;
+  }
+
+  .thread__note > p:not(.thread__label, .thread__signature) {
+    font-family: var(--font-reading);
   }
 
   .thread__note > p + p {
