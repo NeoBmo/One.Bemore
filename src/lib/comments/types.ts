@@ -25,10 +25,16 @@ export interface StoredComment {
   alias: string;
   body: string;
   status: CommentStatus;
+  // Marca aparte del estado: si el autor lo borra, nunca se publicará,
+  // aunque Luis lo apruebe después. El estado sigue siendo decisión de Luis.
+  authorDeleted: boolean;
   authorTokenHash: string;
   ipHash: string;
   createdAt: string;
 }
+
+// Se ve completo solo lo visible que su autor no borró.
+export const isShown = (comment: StoredComment): boolean => comment.status === 'visible' && !comment.authorDeleted;
 
 export interface Vote {
   commentId: string;
@@ -55,6 +61,8 @@ export interface CommentStore {
   getById(id: string): Promise<StoredComment | undefined>;
   insert(comment: StoredComment): Promise<void>;
   setStatus(id: string, status: CommentStatus): Promise<void>;
+  // Atómico en la base de datos: solo marca si el hash del autor coincide.
+  markAuthorDeleted(id: string, authorTokenHash: string): Promise<boolean>;
   countRecentByIp(ipHash: string, sinceIso: string): Promise<number>;
   getVote(commentId: string, voterHash: string): Promise<Vote | undefined>;
   saveVote(vote: Vote): Promise<void>;

@@ -1,9 +1,14 @@
 import { reviewBody } from './moderation.ts';
-import { aliasFromHash, generateToken, hashToken, isHash, isToken } from './token.ts';
-import { LIMITS, type CommentStatus, type CommentStore, type StoredComment } from './types.ts';
+import { aliasFromHash, hashToken, isHash, issueToken, verifyToken } from './token.ts';
+import { LIMITS, isShown, type CommentStatus, type CommentStore, type StoredComment } from './types.ts';
 import { validateDraft, type CommentDraft, type DraftError } from './validate.ts';
 
-export interface PostContext {
+// Secretos que solo conoce el servidor. Llegan desde las variables de entorno.
+export interface Secrets {
+  tokenSecret: string;
+}
+
+export interface PostContext extends Secrets {
   now: Date;
   // La IP ya llega convertida en hash por la capa de servidor; nunca en claro.
   ipHash: string;
@@ -22,17 +27,16 @@ const assertIpHash = (ipHash: string) => {
   if (!isHash(ipHash)) throw new Error('ipHash debe ser un SHA-256 en hexadecimal');
 };
 
-// Sube por los padres. La rama está abierta solo si todos sus ancestros son visibles;
-// así una cuarentena o un ocultamiento cierra también todo lo que cuelga de él.
+// Sube por los padres. La rama está abierta solo si todos sus ancestros se muestran;
+// así una cuarentena, un ocultamiento o un borrado cierra todo lo que cuelga de él.
 const openBranchDepth = async (store: CommentStore, comment: StoredComment): Promise<number | undefined> => {
   let current: StoredComment | undefined = comment;
   let depth = 0;
   while (current) {
-    if (current.status !== 'visible') return undefined;
+    if (!isShown(current)) return undefined;
     if (!current.parentId) return depth;
     if (++depth > LIMITS.maxDepth) return undefined;
     current = await store.getById(current.parentId);
-    if (!current) return undefined;
   }
   return undefined;
 };
@@ -40,12 +44,6 @@ const openBranchDepth = async (store: CommentStore, comment: StoredComment): Pro
 // Reglas de publicación. Turnstile se verifica antes, en la capa de servidor.
 export const postComment = async (store: CommentStore, draft: CommentDraft, ctx: PostContext): Promise<PostResult> => {
   assertIpHash(ctx.ipHash);
-
-  // Un bot rellenó el campo trampa: respondemos igual que a un éxito real,
-  // con la misma forma, para no enseñarle qué lo delató.
-  if (String(draft.honeypot ?? '').trim()) {
-    return { ok: true, id: ctx.newId(), status: 'visible', token: isToken(draft.token) ? undefined : generateToken() };
-  }
 
   const checked = validateDraft(draft);
   if (!checked.ok) return { ok: false, error: checked.error };
@@ -66,11 +64,17 @@ export const postComment = async (store: CommentStore, draft: CommentDraft, ctx:
     return { ok: false, error: 'rate-limited' };
   }
 
-  // Sin token válido, este lector es nuevo: se le entrega uno y solo se guarda su hash.
-  const newToken = isToken(draft.token) ? undefined : generateToken();
+  // Sin token válido (firma incluida), este lector es nuevo: se le emite uno.
+  const hasToken = await verifyToken(draft.token, ctx.tokenSecret);
+  const newToken = hasToken ? undefined : await issueToken(ctx.tokenSecret);
+
+  // Un bot rellenó el campo trampa. Se comprueba al final, después de validar y del límite,
+  // para que su respuesta sea indistinguible de un éxito real.
+  if (String(draft.honeypot ?? '').trim()) return { ok: true, id: ctx.newId(), status: 'visible', token: newToken };
+
   const tokenHash = await hashToken(newToken ?? (draft.token as string));
-  // El alias también se modera: es texto público igual que el comentario.
-  const flagged = reviewBody(body).length > 0 || (alias !== '' && reviewBody(alias).length > 0);
+  // El alias también se modera: es texto público y no admite enlaces.
+  const flagged = reviewBody(body).length > 0 || (alias !== '' && reviewBody(alias, 0).length > 0);
   const status: CommentStatus = flagged ? 'quarantined' : 'visible';
   const id = ctx.newId();
 
@@ -78,9 +82,10 @@ export const postComment = async (store: CommentStore, draft: CommentDraft, ctx:
     id,
     postSlug,
     parentId,
-    alias: alias || aliasFromHash(tokenHash),
+    alias: alias || (await aliasFromHash(tokenHash, ctx.tokenSecret)),
     body,
     status,
+    authorDeleted: false,
     authorTokenHash: tokenHash,
     ipHash: ctx.ipHash,
     createdAt: ctx.now.toISOString(),
@@ -91,20 +96,20 @@ export const postComment = async (store: CommentStore, draft: CommentDraft, ctx:
 
 export type VoteError = 'no-token' | 'invalid-vote' | 'not-found' | 'own-comment';
 
-// Votar exige un token ya emitido: crear uno por voto permitiría votar sin límite.
+// Votar exige un token firmado por el servidor: no se puede fabricar uno por voto.
 // Un voto por lector y comentario; repetir el mismo valor lo retira.
 export const voteComment = async (
   store: CommentStore,
-  input: { commentId: string; value: unknown; token?: string; ipHash: string },
+  input: { commentId: string; value: unknown; token?: string; ipHash: string } & Secrets,
 ): Promise<{ ok: true; error?: undefined } | { ok: false; error: VoteError }> => {
   assertIpHash(input.ipHash);
-  if (!isToken(input.token)) return { ok: false, error: 'no-token' };
+  if (!(await verifyToken(input.token, input.tokenSecret))) return { ok: false, error: 'no-token' };
   if (input.value !== 1 && input.value !== -1) return { ok: false, error: 'invalid-vote' };
 
   const comment = await store.getById(input.commentId);
   if (!comment || (await openBranchDepth(store, comment)) === undefined) return { ok: false, error: 'not-found' };
 
-  const voterHash = await hashToken(input.token);
+  const voterHash = await hashToken(input.token as string);
   // Con otro token pero desde la misma conexión del autor también cuenta como propio.
   if (voterHash === comment.authorTokenHash || input.ipHash === comment.ipHash) {
     return { ok: false, error: 'own-comment' };
@@ -117,17 +122,19 @@ export const voteComment = async (
   return { ok: true };
 };
 
-// Solo quien tiene el token del autor puede borrar, y solo lo que está visible:
-// borrar no puede deshacer una cuarentena ni un ocultamiento decididos por Luis.
+// Solo quien tiene el token del autor puede borrar. No toca el estado que decidió Luis:
+// pone una marca propia, así un comentario en revisión borrado nunca llega a publicarse.
 export const deleteOwnComment = async (
   store: CommentStore,
-  input: { commentId: string; token?: string },
+  input: { commentId: string; token?: string } & Secrets,
 ): Promise<{ ok: true; error?: undefined } | { ok: false; error: 'not-found' | 'forbidden' }> => {
   const comment = await store.getById(input.commentId);
-  if (!comment || comment.status === 'deleted') return { ok: false, error: 'not-found' };
-  if (!isToken(input.token) || (await hashToken(input.token)) !== comment.authorTokenHash) {
-    return { ok: false, error: 'forbidden' };
-  }
-  if (comment.status === 'visible') await store.setStatus(comment.id, 'deleted');
-  return { ok: true };
+  if (!comment || comment.authorDeleted) return { ok: false, error: 'not-found' };
+  if (!(await verifyToken(input.token, input.tokenSecret))) return { ok: false, error: 'forbidden' };
+  const marked = await store.markAuthorDeleted(comment.id, await hashToken(input.token as string));
+  return marked ? { ok: true } : { ok: false, error: 'forbidden' };
 };
+
+// Emite un token para quien quiere votar sin haber comentado. La capa de servidor
+// lo protege con Turnstile para que no se puedan pedir tokens en masa.
+export const issueReaderToken = (secrets: Secrets): Promise<string> => issueToken(secrets.tokenSecret);

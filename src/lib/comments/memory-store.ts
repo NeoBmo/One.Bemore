@@ -24,6 +24,13 @@ export class InMemoryCommentStore implements CommentStore {
     if (comment) comment.status = status;
   }
 
+  async markAuthorDeleted(id: string, authorTokenHash: string) {
+    const comment = this.comments.find((item) => item.id === id && item.authorTokenHash === authorTokenHash);
+    if (!comment) return false;
+    comment.authorDeleted = true;
+    return true;
+  }
+
   async countRecentByIp(ipHash: string, sinceIso: string) {
     return this.comments.filter((comment) => comment.ipHash === ipHash && comment.createdAt >= sinceIso).length;
   }

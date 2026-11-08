@@ -1,4 +1,4 @@
-import { LIMITS, type PublicComment, type StoredComment, type Vote } from './types.ts';
+import { LIMITS, isShown, type PublicComment, type StoredComment, type Vote } from './types.ts';
 
 const byScoreThenAge = (a: PublicComment, b: PublicComment) =>
   b.score - a.score || a.createdAt.localeCompare(b.createdAt);
@@ -22,14 +22,13 @@ export const buildThread = (
   }
 
   // El tope de profundidad protege contra datos editados a mano: nunca hay recursión sin fin.
-  const build = (parentId: string | null, depth: number): PublicComment[] =>
-    depth > LIMITS.maxDepth
-      ? []
-      : (children.get(parentId) ?? [])
+  const build = (parentId: string | null, depth: number): PublicComment[] => {
+    if (depth > LIMITS.maxDepth) return [];
+    return (children.get(parentId) ?? [])
       .filter((comment) => comment.status !== 'quarantined')
       .map((comment) => {
         const replies = build(comment.id, depth + 1);
-        const removed = comment.status !== 'visible';
+        const removed = !isShown(comment);
         if (removed && replies.length === 0) return undefined;
         return {
           id: comment.id,
@@ -38,7 +37,7 @@ export const buildThread = (
           removed,
           score: scores.get(comment.id) ?? 0,
           createdAt: comment.createdAt,
-          mine: Boolean(viewerTokenHash) && comment.authorTokenHash === viewerTokenHash,
+          mine: !removed && Boolean(viewerTokenHash) && comment.authorTokenHash === viewerTokenHash,
           depth,
           indent: Math.min(depth, LIMITS.maxIndent),
           replies,
@@ -46,6 +45,7 @@ export const buildThread = (
       })
       .filter((comment): comment is PublicComment => comment !== undefined)
       .sort(byScoreThenAge);
+  };
 
   return build(null, 0);
 };

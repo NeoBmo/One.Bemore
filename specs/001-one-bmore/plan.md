@@ -78,3 +78,13 @@ Postgres, no en JavaScript, y el adaptador de Supabase debe usarlas.
 | Longitud del texto | `CHECK (char_length(body) BETWEEN 2 AND 2000)`, en puntos de código como el dominio |
 | Puntuación | Vista con la suma de votos: el servidor no recibe los `voter_hash` |
 | Acceso | RLS activo y sin políticas públicas; solo la clave secreta del servidor escribe |
+| Borrado por el autor | Columna `author_deleted boolean`; `UPDATE ... SET author_deleted = true WHERE id = $1 AND author_token_hash = $2` |
+| Rama abierta al votar | `toggle_vote` comprueba con un CTE recursivo que ningún ancestro esté oculto, en cuarentena o borrado |
+
+**Tokens firmados.** El token es `aleatorio.firma`, con la firma HMAC-SHA256 de un secreto que
+solo conoce el servidor (`COMMENT_TOKEN_SECRET`, al menos 32 caracteres). Quien quiera votar
+sin haber comentado pide un token a una acción protegida por Turnstile.
+
+**Riesgo residual aceptado.** Un bot que rellena el campo trampa recibe siempre éxito, así que
+tras 5 envíos podría notar que no lo frena el límite por IP. Igualar ese comportamiento
+exigiría guardar los envíos trampa; se decide no guardarlos.

@@ -61,7 +61,7 @@ cuentas de usuario y funciones de IA dentro del blog.
 ### Comentarios
 
 - RF-24: EL SISTEMA mostrará comentarios solo al final del artículo, colgando de la última anotación; sin anotación, el primero abre el hilo.
-- RF-25: CUANDO alguien comente por primera vez, EL SISTEMA emitirá un token aleatorio y guardará solo su hash.
+- RF-25: CUANDO alguien comente o quiera votar por primera vez, EL SISTEMA emitirá un token aleatorio firmado con un secreto del servidor y guardará solo su hash; un token sin firma válida no sirve.
 - RF-26: CUANDO un comentario pase los filtros, EL SISTEMA lo publicará al instante.
 - RF-27: SI un comentario parece spam, ENTONCES EL SISTEMA lo dejará en `quarantined`, invisible para el público.
 - RF-28: CUANDO alguien responda, EL SISTEMA guardará `parent_id` y mostrará sangría hasta 4 niveles.
@@ -73,7 +73,7 @@ cuentas de usuario y funciones de IA dentro del blog.
 - RF-34: SI el texto tiene menos de 2 o más de 2000 caracteres, o el alias más de 40, ENTONCES EL SISTEMA rechazará el comentario indicando el motivo.
 - RF-35: SI una misma IP envía más de 5 comentarios en 10 minutos, ENTONCES EL SISTEMA rechazará los siguientes hasta que pase la ventana.
 - RF-36: SI el campo trampa llega relleno, ENTONCES EL SISTEMA responderá como si aceptara el comentario, sin guardarlo.
-- RF-37: CUANDO quien comentó lo borre con su token, EL SISTEMA lo marcará `deleted`; nadie más podrá borrarlo.
+- RF-37: CUANDO quien comentó lo borre con su token, EL SISTEMA lo marcará como borrado por su autor sin tocar el estado de moderación; nunca volverá a publicarse, aunque Luis lo apruebe, y nadie más podrá borrarlo.
 - RF-38: EL SISTEMA no permitirá votar el propio comentario; repetir el mismo voto lo retira.
 - RF-39: EL SISTEMA guardará la IP solo como hash con sal secreta, nunca en claro.
 
