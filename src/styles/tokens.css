@@ -17,6 +17,8 @@
   --color-accent: var(--pink-400);
   --color-meta: var(--pink-300);
   --color-rule: var(--pink-800);
+  /* Bordes de controles: 4.25:1 sobre negro, por encima del 3:1 que pide WCAG. */
+  --color-control: var(--pink-600);
   --color-dot: #2c0f20;
 
   --dot-period: 28px;
