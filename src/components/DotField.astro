@@ -4,6 +4,7 @@ const TRAIL_SIZE = 16;
 
 <div class="dot-field" aria-hidden="true">
   <div class="dot-field__glow" data-dot-glow></div>
+  <div class="dot-field__pulse" data-dot-pulse></div>
   {Array.from({ length: TRAIL_SIZE }, () => <div class="dot-field__mark" data-dot-mark></div>)}
   <div class="dot-field__sheet" data-dot-sheet></div>
 </div>
@@ -32,6 +33,7 @@ const TRAIL_SIZE = 16;
   }
 
   .dot-field__glow,
+  .dot-field__pulse,
   .dot-field__mark {
     position: absolute;
     top: 0;
@@ -50,6 +52,14 @@ const TRAIL_SIZE = 16;
 
   .dot-field__glow[data-active] {
     opacity: 1;
+  }
+
+  /* La onda del clic nace del tamaño de la luz y se abre hasta casi triplicarlo. */
+  .dot-field__pulse {
+    width: 11rem;
+    height: 11rem;
+    margin: -5.5rem 0 0 -5.5rem;
+    background: var(--dot-light);
   }
 
   .dot-field__mark {
@@ -79,6 +89,7 @@ const TRAIL_SIZE = 16;
 
   const sheet = document.querySelector<HTMLElement>('[data-dot-sheet]');
   const glow = document.querySelector<HTMLElement>('[data-dot-glow]');
+  const pulse = document.querySelector<HTMLElement>('[data-dot-pulse]');
   const marks = [...document.querySelectorAll<HTMLElement>('[data-dot-mark]')];
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
@@ -148,6 +159,23 @@ const TRAIL_SIZE = 16;
     if (touch) leaveMark({ x: touch.clientX, y: touch.clientY });
   };
 
+  // Clic o toque: la luz se abre como una onda y se apaga. Un clic nuevo reinicia la onda.
+  const onPress = (event: PointerEvent) => {
+    if (reducedMotion.matches || !pulse || !event.isPrimary) return;
+    const at = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+    pulse.getAnimations().forEach((animation) => animation.cancel());
+    // La onda se abre rápido, pero el brillo se sostiene antes de apagarse:
+    // con una sola curva se apagaría antes de alcanzar a verse.
+    pulse.animate([{ transform: `${at} scale(0.6)` }, { transform: `${at} scale(2.8)` }], {
+      duration: 750,
+      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+    });
+    pulse.animate([{ opacity: 1 }, { opacity: 0.8, offset: 0.4 }, { opacity: 0 }], {
+      duration: 750,
+      easing: 'linear',
+    });
+  };
+
   const hideGlow = () => {
     glow?.removeAttribute('data-active');
     lastMark = undefined;
@@ -157,6 +185,7 @@ const TRAIL_SIZE = 16;
   window.addEventListener('scroll', requestSheet, { passive: true });
   window.addEventListener('pageshow', paintSheet);
   window.addEventListener('pointermove', onPointerMove, { passive: true });
+  window.addEventListener('pointerdown', onPress, { passive: true });
   window.addEventListener('touchstart', onTouch, { passive: true });
   window.addEventListener('touchmove', onTouch, { passive: true });
   window.addEventListener('touchend', () => (lastMark = undefined), { passive: true });

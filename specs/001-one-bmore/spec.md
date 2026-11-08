@@ -52,6 +52,7 @@ cuentas de usuario y funciones de IA dentro del blog.
 
 - RF-18: MIENTRAS se haga scroll, EL SISTEMA moverá los puntos a 0.12 de la velocidad del contenido.
 - RF-19: CUANDO el ratón o el dedo se muevan, EL SISTEMA iluminará los puntos cercanos y dejará un rastro que se desvanece.
+- RF-19b: CUANDO se haga clic o se toque la pantalla, EL SISTEMA abrirá una onda de luz desde ese punto que se apaga en menos de un segundo.
 - RF-20: MIENTRAS `prefers-reduced-motion: reduce` esté activo, EL SISTEMA dejará el fondo quieto y sin transiciones de movimiento.
 - RF-21: EL SISTEMA animará solo `transform` y `opacity`, y cada animación comunicará un estado.
 - RF-22: CUANDO se navegue entre páginas, EL SISTEMA usará View Transitions nativas si el navegador las admite.
