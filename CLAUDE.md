@@ -1,4 +1,4 @@
-# one.bmore
+# One.Bemore
 
 Blog personal en Astro. Luis escribe los artículos solo en Markdown.
 

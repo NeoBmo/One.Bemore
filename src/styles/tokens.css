@@ -1,10 +1,23 @@
 :root {
   color-scheme: dark;
 
+  /* Escala derivada de #f472b6. Del 200 al 500 sirven para texto sobre negro
+     (contraste de 14.2 a 6.0); del 600 al 900, solo para líneas y superficies. */
+  --pink-200: #fbc6dd;
+  --pink-300: #f8a1c8;
+  --pink-400: #f472b6;
+  --pink-500: #e2549c;
+  --pink-600: #c13d80;
+  --pink-700: #962e63;
+  --pink-800: #682146;
+  --pink-900: #3a1328;
+
   --color-paper: #000;
   --color-ink: #fff0f6;
-  --color-accent: #f472b6;
-  --color-dot: #6a3154;
+  --color-accent: var(--pink-400);
+  --color-meta: var(--pink-300);
+  --color-rule: var(--pink-800);
+  --color-dot: #2c0f20;
 
   --dot-period: 28px;
 
@@ -22,4 +35,21 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-press: 140ms;
   --duration-hover: 220ms;
+}
+
+/* Cada tipo de artículo tiene su tono: da variedad sin salir de la paleta. */
+[data-tone='reflexion'] {
+  --tone: var(--pink-300);
+}
+
+[data-tone='historia'] {
+  --tone: var(--pink-500);
+}
+
+[data-tone='curiosidad'] {
+  --tone: var(--pink-400);
+}
+
+[data-tone='ensenanza'] {
+  --tone: var(--pink-200);
 }

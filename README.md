@@ -1,4 +1,4 @@
-# one.bmore
+# One.Bemore
 
 Blog personal a la antigua con interfaz moderna: un cuaderno negro de puntos donde
 cada artículo es un archivo Markdown.

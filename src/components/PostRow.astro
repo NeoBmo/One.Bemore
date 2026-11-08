@@ -11,7 +11,7 @@ const { post } = Astro.props;
 const { title, description, pubDate, type, series } = post.data;
 ---
 
-<article class="post-row">
+<article class="post-row" data-tone={type}>
   <p class="post-row__meta">
     <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
     <span aria-hidden="true">·</span>
@@ -33,7 +33,7 @@ const { title, description, pubDate, type, series } = post.data;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    color: var(--color-accent);
+    color: var(--tone);
     font-size: var(--text-sm);
   }
 

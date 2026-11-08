@@ -1,5 +1,5 @@
 export const SITE = {
-  name: 'one.bmore',
+  name: 'One.Bemore',
   author: 'Luis',
   description:
     'Un cuaderno abierto: reflexiones, historias, curiosidades con contexto y enseñanzas que vale la pena conservar.',

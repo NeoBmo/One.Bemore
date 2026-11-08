@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { DOT_PERIOD, dotOffset, follow } from '../src/lib/dot-field.ts';
+import { DOT_PERIOD, TRAIL_SPACING, dotOffset, follow, shouldMark } from '../src/lib/dot-field.ts';
+
+test('el rastro deja la primera marca y luego una cada cierta distancia', () => {
+  assert.equal(shouldMark(undefined, { x: 0, y: 0 }), true);
+  assert.equal(shouldMark({ x: 0, y: 0 }, { x: TRAIL_SPACING - 1, y: 0 }), false);
+  assert.equal(shouldMark({ x: 0, y: 0 }, { x: 30, y: 30 }), true);
+});
 
 test('los puntos avanzan a 0.12 de la velocidad del scroll', () => {
   assert.equal(dotOffset(100), -12);

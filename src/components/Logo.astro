@@ -1,10 +1,17 @@
 ---
-// Cuando llegue el dibujo, va en src/assets/logo.svg y se pinta aquí junto al nombre.
+import Face from '../assets/face.svg';
+import { SITE } from '../consts';
+
+interface Props {
+  size?: 'large' | 'small';
+}
+
+const { size = 'large' } = Astro.props;
 ---
 
-<a class="logo press" href="/" aria-label="one.bmore, inicio">
-  <span class="logo__mark" aria-hidden="true"></span>
-  <span class="logo__name">one.bmore</span>
+<a class:list={['logo', 'press', `logo--${size}`]} href="/" aria-label={`${SITE.name}, inicio`}>
+  <Face class="logo__face" aria-hidden="true" />
+  <span class="logo__name">{SITE.name}</span>
 </a>
 
 <style>
@@ -13,22 +20,30 @@
     align-items: center;
     gap: 0.6rem;
     font-family: var(--font-hand);
-    font-size: var(--text-lg);
     font-weight: 700;
     text-decoration: none;
   }
 
-  .logo__mark {
-    width: 0.7em;
-    height: 0.7em;
-    border-radius: 50%;
-    background: var(--color-accent);
+  .logo--large {
+    font-size: var(--text-lg);
+  }
+
+  .logo--small {
+    color: var(--color-meta);
+    font-size: var(--text-base);
+  }
+
+  .logo__face {
+    width: 1.9em;
+    height: 1.9em;
+    color: var(--color-accent);
     transition: transform var(--duration-hover) var(--ease-out);
   }
 
+  /* Un leve giro, como quien inclina la cabeza al saludar. */
   @media (hover: hover) and (pointer: fine) {
-    .logo:hover .logo__mark {
-      transform: scale(1.25) rotate(-8deg);
+    .logo:hover .logo__face {
+      transform: rotate(-10deg) scale(1.08);
     }
   }
 </style>

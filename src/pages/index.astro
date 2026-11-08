@@ -7,7 +7,7 @@ import { getPosts } from '../lib/blog';
 const latest = (await getPosts()).slice(0, 3);
 ---
 
-<Page title={SITE.name} description={SITE.description}>
+<Page title={SITE.name} description={SITE.description} header="home" footer>
   <section class="intro" aria-labelledby="intro-title">
     <h1 id="intro-title" class="rise">Un cuaderno abierto.</h1>
     <p class="intro__lead rise" style="--order: 1">
@@ -17,7 +17,7 @@ const latest = (await getPosts()).slice(0, 3);
     <dl class="intro__types rise" style="--order: 2">
       {
         POST_TYPE_KEYS.map((key) => (
-          <div>
+          <div data-tone={key}>
             <dt>
               <a class="ink-link" href={`/blog/?tipo=${key}`}>{POST_TYPES[key].plural}</a>
             </dt>
@@ -70,7 +70,7 @@ const latest = (await getPosts()).slice(0, 3);
   }
 
   .intro__types a {
-    color: var(--color-accent);
+    color: var(--tone);
   }
 
   .latest h2 {

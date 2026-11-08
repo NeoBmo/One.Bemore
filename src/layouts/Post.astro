@@ -16,11 +16,11 @@ const { post, edited, previous, next } = Astro.props;
 const { title, description, pubDate, type, series, order, note } = post.data;
 ---
 
-<Page title={title} description={description} type="article">
-  <div class="reading-progress" aria-hidden="true"></div>
+<Page title={title} description={description} type="article" header="post">
+  <div class="reading-progress" aria-hidden="true" data-progress></div>
   <article class="post">
     <header class="post__header">
-      <p class="post__type">
+      <p class="post__type" data-tone={type}>
         <a class="ink-link" href={`/blog/?tipo=${type}`}>{POST_TYPES[type].label}</a>
         {series && <span>· {series}, lección {order}</span>}
       </p>
@@ -87,7 +87,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
   .post__type {
     display: flex;
     gap: 0.5rem;
-    color: var(--color-accent);
+    color: var(--tone);
     font-size: var(--text-sm);
   }
 
@@ -98,6 +98,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
 
   .post__dates {
     margin-top: 1rem;
+    color: var(--color-meta);
     font-size: var(--text-sm);
   }
 
@@ -110,7 +111,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: 1rem;
     padding-block: 2rem;
-    border-block: 1px dashed var(--color-dot);
+    border-block: 1px dashed var(--color-rule);
   }
 
   .post__nav-link {
@@ -122,7 +123,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
   }
 
   .post__nav-link span {
-    color: var(--color-accent);
+    color: var(--color-meta);
     font-family: var(--font-reading);
     font-size: var(--text-sm);
     font-weight: 400;
@@ -136,7 +137,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
   .thread {
     margin-top: 3rem;
     padding-left: 1.5rem;
-    border-left: 2px dashed var(--color-accent);
+    border-left: 2px dashed var(--pink-700);
   }
 
   .thread__note {
@@ -150,8 +151,8 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     left: calc(-1.5rem - 7px);
     width: 12px;
     height: 12px;
-    border-radius: 50%;
     background: var(--color-accent);
+    transform: rotate(45deg);
   }
 
   .thread__label {
@@ -178,7 +179,8 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     white-space: nowrap;
   }
 
-  /* Barra de lectura en el hilo del compositor, sin JavaScript. */
+  /* La barra avanza con el scroll en el hilo del compositor y solo se deja ver
+     mientras la persona se desplaza; al detenerse se desvanece. */
   .reading-progress {
     position: fixed;
     inset: 0 0 auto;
@@ -187,6 +189,13 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     background: var(--color-accent);
     transform: scaleX(0);
     transform-origin: left;
+    opacity: 0;
+    transition: opacity 700ms ease;
+  }
+
+  .reading-progress[data-visible] {
+    opacity: 1;
+    transition-duration: 150ms;
   }
 
   @supports (animation-timeline: scroll()) {
@@ -204,3 +213,19 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     }
   }
 </style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-progress]');
+  let hideTimer = 0;
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!bar) return;
+      bar.dataset.visible = '';
+      clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(() => bar.removeAttribute('data-visible'), 900);
+    },
+    { passive: true },
+  );
+</script>

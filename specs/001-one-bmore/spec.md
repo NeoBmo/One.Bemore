@@ -15,12 +15,12 @@ cuentas de usuario y funciones de IA dentro del blog.
 
 | Tema | Decisión |
 |---|---|
-| Nombre | one.bmore; el sitio no explica su significado |
-| Color | Negro `#000`, acento `#f472b6`, texto `#fff0f6`. Sin gris |
+| Nombre | One.Bemore; el sitio no explica su significado |
+| Color | Negro `#000`, texto `#fff0f6` y escala rosada derivada de `#f472b6`. Sin gris ni esquinas redondeadas |
 | Lectura | JetBrains Mono |
 | Mano | Shantell Sans provisional en logo, títulos y notas, hasta tener una fuente propia |
-| Logo | Dibujo de su hija; mientras llega, el nombre escrito con la fuente de mano |
-| Fondo | Cuaderno negro de puntos con parallax lento |
+| Logo | La cara del dibujo de su hija como icono; el dibujo completo en `/sobre-mi/` |
+| Fondo | Cuaderno negro de puntos muy tenues, parallax lento y rastro de luz con ratón o dedo |
 | Estilos | CSS propio con tokens, sin Tailwind |
 
 ## Requisitos
@@ -51,7 +51,7 @@ cuentas de usuario y funciones de IA dentro del blog.
 ### Apariencia y movimiento
 
 - RF-18: MIENTRAS se haga scroll, EL SISTEMA moverá los puntos a 0.12 de la velocidad del contenido.
-- RF-19: MIENTRAS exista un puntero fino, EL SISTEMA iluminará de rosado los puntos cercanos al cursor.
+- RF-19: CUANDO el ratón o el dedo se muevan, EL SISTEMA iluminará los puntos cercanos y dejará un rastro que se desvanece.
 - RF-20: MIENTRAS `prefers-reduced-motion: reduce` esté activo, EL SISTEMA dejará el fondo quieto y sin transiciones de movimiento.
 - RF-21: EL SISTEMA animará solo `transform` y `opacity`, y cada animación comunicará un estado.
 - RF-22: CUANDO se navegue entre páginas, EL SISTEMA usará View Transitions nativas si el navegador las admite.

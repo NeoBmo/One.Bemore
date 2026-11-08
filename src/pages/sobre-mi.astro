@@ -1,12 +1,19 @@
 ---
+import Drawing from '../assets/drawing.svg';
+import { SITE } from '../consts';
 import Page from '../layouts/Page.astro';
 import '../styles/prose.css';
 ---
 
-<Page title="Sobre mí" description="Quién escribe one.bmore y cómo está hecho este cuaderno.">
+<Page title="Sobre mí" description={`Quién escribe ${SITE.name}, por qué existe y cómo está hecho este cuaderno.`}>
   <header class="about__header">
     <h1 class="rise">Lo que me impulsó a seguir</h1>
   </header>
+
+  <figure class="about__drawing rise" style="--order: 1">
+    <Drawing class="about__art" role="img" aria-label="Dibujo a mano de una cara sonriente con piernas" />
+    <figcaption>Dibujo de mi hija. De él sale el icono de este cuaderno.</figcaption>
+  </figure>
 
   <div class="prose">
     <p>
@@ -37,8 +44,9 @@ import '../styles/prose.css';
       Sans.
     </p>
     <p>
-      El fondo es una hoja negra perforada sobre una luz rosada. Al hacer scroll solo se mueve un periodo de la
-      cuadrícula, y como se repite, parece infinito. Si prefieres menos movimiento, el fondo se queda quieto.
+      El fondo es una hoja negra perforada sobre luces rosadas. Al hacer scroll solo se mueve un periodo de la
+      cuadrícula, y como se repite, parece infinito. Si mueves el ratón o el dedo, los puntos que tocas se encienden y
+      se apagan despacio. Si prefieres menos movimiento, todo se queda quieto.
     </p>
   </div>
 </Page>
@@ -50,5 +58,35 @@ import '../styles/prose.css';
 
   .about__header h1 {
     font-size: var(--text-title);
+  }
+
+  .about__drawing {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    margin-block: 0 2.5rem;
+    color: var(--color-meta);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  .about__art {
+    width: min(14rem, 60%);
+    height: auto;
+    color: var(--color-ink);
+  }
+
+  /* En pantallas anchas el dibujo acompaña al texto desde el margen. */
+  @media (min-width: 60rem) {
+    .about__drawing {
+      float: right;
+      width: 13rem;
+      margin: 0 -15rem 1rem 2rem;
+      shape-outside: margin-box;
+    }
+
+    .about__art {
+      width: 100%;
+    }
   }
 </style>
