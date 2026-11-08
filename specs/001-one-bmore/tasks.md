@@ -64,3 +64,4 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | 2026-11-07 | Ajustes de Luis: nombre One.Bemore, icono y dibujo de su hija, paleta rosada, sin esquinas redondeadas, rastro táctil, barra reactiva, pie solo en inicio |
 | 2026-11-08 | T11 detenida tras 3 intentos: la revisión final pide 2 cambios importantes (enlace con www contado doble; fila contradictoria en plan.md) y 9 sugerencias. Esperando decisión de Luis |
 | 2026-11-08 | T11 validada: revisión independiente con Opus APROBADO en la cuarta ronda, con 72 tests. Pendiente para T12: marca de autor del servidor contra suplantación con letras parecidas |
+| 2026-11-08 | Rediseño minimalista por feedback de los primeros lectores: una fuente, paleta mínima, inicio plegado, tarjetas, archivo con Ver más, viaje entre páginas. Rama `feat/minimal-redesign` |

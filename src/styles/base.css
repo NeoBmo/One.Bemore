@@ -18,14 +18,14 @@ html {
   /* Lo que pinta el navegador también usa la paleta: sin estos valores,
      el modo oscuro los dibuja en gris. */
   scrollbar-width: thin;
-  scrollbar-color: var(--pink-800) transparent;
+  scrollbar-color: #3a3a3a transparent;
   accent-color: var(--color-accent);
   caret-color: var(--color-accent);
   -webkit-tap-highlight-color: transparent;
 }
 
 ::placeholder {
-  color: var(--color-meta);
+  color: var(--color-muted);
   opacity: 1;
 }
 
@@ -43,10 +43,9 @@ input[type='search']::-webkit-search-cancel-button {
 body {
   min-height: 100dvh;
   color: var(--color-ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-reading);
   font-size: var(--text-base);
   line-height: 1.75;
-  font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -72,9 +71,9 @@ a {
 h1,
 h2,
 h3 {
-  font-family: var(--font-hand);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
@@ -146,31 +145,89 @@ h3 {
   transform: scale(0.97);
 }
 
-/* Entrada corta y única: indica que la página terminó de llegar. */
+/* Viaje entre páginas: el cuaderno (fondo y cabecera) se queda quieto y cambia la hoja.
+   Hacia adelante la hoja nueva entra por la derecha; al volver, por la izquierda. */
+@view-transition {
+  navigation: auto;
+}
+
+.dot-field {
+  view-transition-name: notebook;
+}
+
+.site-header {
+  view-transition-name: masthead;
+}
+
+main {
+  view-transition-name: sheet;
+}
+
+::view-transition-group(notebook),
+::view-transition-old(notebook),
+::view-transition-new(notebook) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .rise {
-    animation: rise 420ms var(--ease-out) backwards;
-    animation-delay: calc(var(--order, 0) * 60ms);
+  ::view-transition-group(*) {
+    animation-duration: var(--duration-page);
+    animation-timing-function: var(--ease-out);
   }
 
-  @keyframes rise {
-    from {
+  ::view-transition-old(sheet) {
+    animation: sheet-out var(--duration-page) var(--ease-out) both;
+  }
+
+  ::view-transition-new(sheet) {
+    animation: sheet-in var(--duration-page) var(--ease-out) both;
+  }
+
+  html:active-view-transition-type(back)::view-transition-old(sheet) {
+    animation-name: sheet-out-back;
+  }
+
+  html:active-view-transition-type(back)::view-transition-new(sheet) {
+    animation-name: sheet-in-back;
+  }
+
+  @keyframes sheet-out {
+    to {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateX(-40px);
     }
   }
 
-  @view-transition {
-    navigation: auto;
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
   }
 
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 180ms;
+  @keyframes sheet-out-back {
+    to {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+  }
+
+  @keyframes sheet-in-back {
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
   }
 }
 
+/* Con movimiento reducido no hay desplazamiento: solo un fundido breve. */
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 150ms;
+  }
+
   *,
   *::before,
   *::after {

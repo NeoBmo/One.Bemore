@@ -1,25 +1,20 @@
 :root {
   color-scheme: dark;
 
-  /* Escala derivada de #f472b6. Del 200 al 500 sirven para texto sobre negro
-     (contraste de 14.2 a 6.0); del 600 al 900, solo para líneas y superficies. */
-  --pink-200: #fbc6dd;
-  --pink-300: #f8a1c8;
-  --pink-400: #f472b6;
-  --pink-500: #e2549c;
-  --pink-600: #c13d80;
-  --pink-700: #962e63;
-  --pink-800: #682146;
-  --pink-900: #3a1328;
-
+  /* Paleta mínima. El texto es blanco roto: el blanco puro «vibra» sobre negro y cansa
+     de noche. El gris marca lo secundario. El rosado aparece solo en lo que se toca. */
   --color-paper: #000;
-  --color-ink: #fff0f6;
-  --color-accent: var(--pink-400);
-  --color-meta: var(--pink-300);
-  --color-rule: var(--pink-800);
-  /* Bordes de controles: 4.25:1 sobre negro, por encima del 3:1 que pide WCAG. */
-  --color-control: var(--pink-600);
-  --color-dot: #2c0f20;
+  --color-ink: #ececec; /* 17.1:1 sobre negro */
+  --color-muted: #9a9a9a; /* 7.4:1: fechas, subtítulos y ayudas */
+  --color-accent: #f472b6; /* 7.9:1: enlaces, foco y estados activos */
+  --color-rule: #262626; /* bordes decorativos de tarjetas y separadores */
+  --color-control: #6b6b6b; /* 3.9:1: bordes de controles, por encima del 3:1 de WCAG */
+  --color-dot: #1c1c1c;
+
+  /* Solo para la luz del fondo: el rosado se apaga hacia tonos oscuros, como una lámpara. */
+  --light-core: #f472b6;
+  --light-mid: #c13d80;
+  --light-edge: #682146;
 
   --dot-period: 28px;
   --dot-size: 2px;
@@ -28,31 +23,18 @@
   --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
   --text-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
   --text-xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
-  --text-title: clamp(2.5rem, 1.9rem + 3vw, 4.25rem);
+  --text-title: clamp(2.25rem, 1.75rem + 2.5vw, 3.5rem);
 
   --space-gutter: clamp(1.25rem, 0.8rem + 2.2vw, 2.5rem);
-  --space-section: clamp(3.5rem, 2.5rem + 5vw, 6.5rem);
+  --space-section: clamp(3rem, 2.25rem + 4vw, 5.5rem);
 
   --measure: 42rem;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-press: 140ms;
   --duration-hover: 220ms;
-}
+  --duration-page: 320ms;
 
-/* Cada tipo de artículo tiene su tono: da variedad sin salir de la paleta. */
-[data-tone='reflexion'] {
-  --tone: var(--pink-300);
-}
-
-[data-tone='historia'] {
-  --tone: var(--pink-500);
-}
-
-[data-tone='curiosidad'] {
-  --tone: var(--pink-400);
-}
-
-[data-tone='ensenanza'] {
-  --tone: var(--pink-200);
+  /* Solo para bloques de código: la monoespaciada del sistema, sin descargar otra fuente. */
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
 }

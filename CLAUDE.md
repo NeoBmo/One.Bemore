@@ -9,7 +9,9 @@ Blog personal en Astro. Luis escribe los artículos solo en Markdown.
 
 ## Reglas del proyecto
 
-- CSS propio con tokens; no reintroducir Tailwind ni gris.
+- CSS propio con tokens; sin Tailwind ni esquinas redondeadas.
+- Paleta mínima: texto blanco roto, gris para lo secundario y rosado solo en lo que se toca.
+- Una sola fuente (iA Writer Quattro); menos es más: no explicar de más al lector.
 - Es una experiencia propia: no copiar el estilo del portafolio.
 - El sitio no explica el significado de los nombres.
 - Animar solo `transform` y `opacity`, y respetar `prefers-reduced-motion`.

@@ -1,28 +1,12 @@
----
-import { SITE } from '../consts';
-
-const year = new Date().getFullYear();
----
-
-<footer class="wrap">
-  <div class="site-footer">
-    <p>Escrito a mano, publicado en Markdown. {SITE.name} · {year}</p>
-    <p><a class="ink-link" href="/rss.xml">RSS</a></p>
-  </div>
+<footer class="site-footer wrap">
+  <p>Escrito a mano, publicado en Markdown.</p>
 </footer>
 
 <style>
-  footer {
-    margin-top: var(--space-section);
-  }
-
   .site-footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.5rem 1.5rem;
+    margin-top: var(--space-section);
     padding-block: 2rem 3rem;
-    border-top: 1px dashed var(--color-rule);
+    color: var(--color-muted);
     font-size: var(--text-sm);
   }
 </style>

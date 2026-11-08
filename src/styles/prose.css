@@ -40,7 +40,7 @@
 }
 
 .prose strong {
-  color: var(--pink-200);
+  color: var(--color-ink);
 }
 
 .prose ul,
@@ -53,12 +53,12 @@
 }
 
 .prose li::marker {
-  color: var(--pink-500);
+  color: var(--color-muted);
 }
 
 .prose blockquote {
   padding-left: 1.25em;
-  border-left: 3px solid var(--pink-700);
+  border-left: 3px solid var(--color-control);
   font-style: italic;
 }
 
@@ -66,7 +66,7 @@
   height: 0;
   margin-block: 3em;
   border: 0;
-  border-top: 2px dotted var(--pink-700);
+  border-top: 1px solid var(--color-rule);
 }
 
 .prose :not(pre) > code {
@@ -75,15 +75,15 @@
   font-size: 0.92em;
 }
 
-/* Paleta del resaltado de código: solo negro, tinta y rosado. */
+/* Resaltado de código: tinta, gris para comentarios y rosado solo en palabras clave. */
 .prose {
   --astro-code-background: var(--color-paper);
   --astro-code-foreground: var(--color-ink);
   --astro-code-token-keyword: var(--color-accent);
   --astro-code-token-constant: var(--color-accent);
-  --astro-code-token-string: #f9a8d4;
-  --astro-code-token-string-expression: #f9a8d4;
-  --astro-code-token-comment: #c2779f;
+  --astro-code-token-string: var(--color-ink);
+  --astro-code-token-string-expression: var(--color-ink);
+  --astro-code-token-comment: var(--color-muted);
   --astro-code-token-function: var(--color-ink);
   --astro-code-token-parameter: var(--color-ink);
   --astro-code-token-punctuation: var(--color-ink);

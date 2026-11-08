@@ -3,12 +3,13 @@ import { render } from 'astro:content';
 import Post from '../../layouts/Post.astro';
 import { getPosts, type Post as PostEntry } from '../../lib/blog';
 import { lastEditDate } from '../../lib/git-dates';
-import { chronologicalNeighbors, editedDate, seriesNeighbors } from '../../lib/posts';
+import { editedDate, seriesNeighbors } from '../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
   return posts.map((post) => {
-    const neighbors = post.data.series ? seriesNeighbors(post, posts) : chronologicalNeighbors(post, posts);
+    // Anterior y siguiente solo dentro de un mini curso; fuera de él no hay continuidad.
+    const neighbors = seriesNeighbors(post, posts);
     const edited = editedDate(post.data.pubDate, post.data.updatedDate, lastEditDate(post.filePath));
     return { params: { slug: post.id }, props: { post, edited, ...neighbors } };
   });

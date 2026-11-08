@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  chronologicalNeighbors,
   editedDate,
+  readingMinutes,
   formatDate,
-  groupByYear,
   matchesSearch,
   normalizeText,
   parseTypeFilter,
@@ -30,11 +29,6 @@ test('los borradores solo se ven en desarrollo', () => {
   assert.equal(publishedPosts(posts, true).length, 2);
 });
 
-test('agrupa por año en orden descendente', () => {
-  const groups = groupByYear([post('a', '2023-06-01'), post('b', '2024-06-01'), post('c', '2023-02-01')]);
-  assert.deepEqual(groups.map((group) => [group.year, group.posts.length]), [[2024, 1], [2023, 2]]);
-});
-
 test('encuentra la lección anterior y la siguiente según order', () => {
   const lessons = [
     post('dos', '2024-01-02', { series: 'Markdown', order: 2 }),
@@ -51,12 +45,10 @@ test('un artículo sin serie no tiene vecinos', () => {
   assert.deepEqual(seriesNeighbors(post('a', '2024-01-01'), []), { previous: undefined, next: undefined });
 });
 
-test('fuera de una serie, anterior es más viejo y siguiente más nuevo', () => {
-  const posts = [post('viejo', '2023-01-01'), post('medio', '2023-06-01'), post('nuevo', '2024-01-01')];
-  const { previous, next } = chronologicalNeighbors(posts[1], posts);
-  assert.equal(previous.id, 'viejo');
-  assert.equal(next.id, 'nuevo');
-  assert.equal(chronologicalNeighbors(posts[2], posts).next, undefined);
+test('el tiempo de lectura redondea a minutos y nunca baja de uno', () => {
+  assert.equal(readingMinutes(''), 1);
+  assert.equal(readingMinutes('una palabra'), 1);
+  assert.equal(readingMinutes(Array(820).fill('palabra').join(' ')), 4);
 });
 
 test('la fecha de edición solo aparece si es de un día posterior', () => {

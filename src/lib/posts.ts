@@ -16,15 +16,6 @@ export const sortByNewest = <T extends PostLike>(posts: readonly T[]): T[] =>
 export const publishedPosts = <T extends PostLike>(posts: readonly T[], includeDrafts: boolean): T[] =>
   includeDrafts ? [...posts] : posts.filter((post) => !post.data.draft);
 
-export const groupByYear = <T extends PostLike>(posts: readonly T[]) => {
-  const groups = new Map<number, T[]>();
-  for (const post of sortByNewest(posts)) {
-    const year = post.data.pubDate.getUTCFullYear();
-    groups.set(year, [...(groups.get(year) ?? []), post]);
-  }
-  return [...groups].map(([year, items]) => ({ year, posts: items }));
-};
-
 export const seriesNeighbors = <T extends PostLike>(post: T, posts: readonly T[]) => {
   const { series } = post.data;
   if (!series) return { previous: undefined, next: undefined };
@@ -37,12 +28,12 @@ export const seriesNeighbors = <T extends PostLike>(post: T, posts: readonly T[]
   return { previous: lessons[index - 1], next: lessons[index + 1] };
 };
 
-// Fuera de una serie, «anterior» es el artículo más viejo y «siguiente» el más nuevo.
-export const chronologicalNeighbors = <T extends PostLike>(post: T, posts: readonly T[]) => {
-  const ordered = sortByNewest(posts);
-  const index = ordered.findIndex((item) => item.id === post.id);
-  if (index === -1) return { previous: undefined, next: undefined };
-  return { previous: ordered[index + 1], next: ordered[index - 1] };
+// Minutos de lectura a 200 palabras por minuto; nunca menos de uno.
+const WORDS_PER_MINUTE = 200;
+
+export const readingMinutes = (text: string): number => {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
 };
 
 const dayOf = (date: Date): string => date.toISOString().slice(0, 10);
