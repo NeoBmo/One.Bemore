@@ -63,12 +63,13 @@ const TRAIL_SIZE = 16;
     position: absolute;
     inset: 0 0 auto;
     height: calc(100% + var(--dot-period));
-    background-image: radial-gradient(
-      circle at center,
-      transparent 1.25px,
-      var(--color-paper) 1.75px
-    );
+    /* Dos franjas negras, una vertical y otra horizontal: solo queda abierto
+       el cuadrado donde ambas dejan hueco. Con píxeles enteros el borde es nítido. */
+    background-image:
+      linear-gradient(to right, transparent var(--dot-size), var(--color-paper) var(--dot-size)),
+      linear-gradient(to bottom, transparent var(--dot-size), var(--color-paper) var(--dot-size));
     background-size: var(--dot-period) var(--dot-period);
+    background-position: calc((var(--dot-period) - var(--dot-size)) / 2) calc((var(--dot-period) - var(--dot-size)) / 2);
     will-change: transform;
   }
 </style>
@@ -91,7 +92,8 @@ const TRAIL_SIZE = 16;
   const paintSheet = () => {
     scrollFrame = 0;
     if (!sheet) return;
-    const offset = reducedMotion.matches ? 0 : dotOffset(window.scrollY);
+    // Redondeado a píxel entero para que los cuadrados no se vean borrosos al moverse.
+    const offset = reducedMotion.matches ? 0 : Math.round(dotOffset(window.scrollY));
     sheet.style.transform = `translate3d(0, ${offset}px, 0)`;
   };
 

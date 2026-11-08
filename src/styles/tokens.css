@@ -20,6 +20,7 @@
   --color-dot: #2c0f20;
 
   --dot-period: 28px;
+  --dot-size: 2px;
 
   --text-sm: 0.875rem;
   --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
