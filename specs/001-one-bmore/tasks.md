@@ -30,7 +30,7 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | T9 | Artículo, anotación y series | `feat/site-pages` | RF-05 a RF-10, RF-22 | implementada |
 | T10 | Sobre mí, 404, RSS y redirección | `feat/site-pages` | RF-16, RF-17 | implementada |
 | T11 | Dominio de comentarios con tests | `feat/comments` | RF-25 a RF-31, RF-34 a RF-39 | validada |
-| T12 | Migración y RLS en Supabase | `feat/comments` | RF-33 | pendiente |
+| T12 | Migración y RLS en Supabase | `feat/comments-backend` | RF-33 | implementada |
 | T13 | Adaptador, Actions y Turnstile | `feat/comments` | RF-26, RF-27, RF-33 | pendiente |
 | T14 | Interfaz de comentarios | `feat/comments` | RF-24, RF-28 a RF-32 | pendiente |
 | T15 | Puerta de calidad y revisión independiente | `chore/launch` | Aceptación | pendiente |
@@ -65,3 +65,4 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | 2026-11-08 | T11 detenida tras 3 intentos: la revisión final pide 2 cambios importantes (enlace con www contado doble; fila contradictoria en plan.md) y 9 sugerencias. Esperando decisión de Luis |
 | 2026-11-08 | T11 validada: revisión independiente con Opus APROBADO en la cuarta ronda, con 72 tests. Pendiente para T12: marca de autor del servidor contra suplantación con letras parecidas |
 | 2026-11-08 | Rediseño minimalista por feedback de los primeros lectores: una fuente, paleta mínima, inicio plegado, tarjetas, archivo con Ver más, viaje entre páginas. Rama `feat/minimal-redesign` |
+| 2026-11-08 | T12: proyecto Supabase `one-bmore-blog` (ref `zbwimwwkxnamyasyupxv`, sa-east-1, plan gratuito) creado con aprobación de Luis. Migración aplicada; 16 comprobaciones en la base pasan |
