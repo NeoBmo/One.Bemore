@@ -17,6 +17,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
 ---
 
 <Page title={title} description={description} type="article" header="post">
+  <div class="post-shell">
   <div class="reading-progress" aria-hidden="true" data-progress></div>
   <article class="post">
     <header class="post__header">
@@ -77,6 +78,7 @@ const { title, description, pubDate, type, series, order, note } = post.data;
       }
     </footer>
   </article>
+  </div>
 </Page>
 
 <style>
@@ -198,11 +200,24 @@ const { title, description, pubDate, type, series, order, note } = post.data;
     transition-duration: 150ms;
   }
 
-  @supports (animation-timeline: scroll()) {
+  /* La barra mide el texto, no la página: el nombre de la línea de tiempo nace
+     en .prose y timeline-scope lo hace visible a la barra, que es su vecina. */
+  .post-shell {
+    timeline-scope: --article;
+  }
+
+  .prose {
+    view-timeline: --article block;
+  }
+
+  @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       .reading-progress {
         animation: reading-progress linear both;
-        animation-timeline: scroll(root);
+        animation-timeline: --article;
+        /* 0 %: el inicio del texto toca el borde superior.
+           100 %: el final del texto toca el borde inferior, es decir, terminaste de leer. */
+        animation-range: contain 0% contain 100%;
       }
 
       @keyframes reading-progress {
@@ -216,12 +231,16 @@ const { title, description, pubDate, type, series, order, note } = post.data;
 
 <script>
   const bar = document.querySelector<HTMLElement>('[data-progress]');
+  const prose = document.querySelector<HTMLElement>('.prose');
   let hideTimer = 0;
+
+  // Si el texto cabe entero en pantalla no hay nada que medir: la barra se oculta.
+  const fitsOnScreen = () => Boolean(prose && prose.offsetHeight <= window.innerHeight);
 
   window.addEventListener(
     'scroll',
     () => {
-      if (!bar) return;
+      if (!bar || fitsOnScreen()) return;
       bar.dataset.visible = '';
       clearTimeout(hideTimer);
       hideTimer = window.setTimeout(() => bar.removeAttribute('data-visible'), 900);
