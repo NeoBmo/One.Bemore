@@ -70,6 +70,16 @@ cuentas de usuario y funciones de IA dentro del blog.
 - RF-31: CUANDO Luis marque `hidden` o `deleted`, EL SISTEMA conservará la rama y mostrará un texto sustituto.
 - RF-32: SI Supabase falla, ENTONCES EL SISTEMA mantendrá el artículo legible e indicará que los comentarios no están disponibles.
 - RF-33: EL SISTEMA mantendrá la clave secreta solo en el servidor, con RLS activo y sin políticas públicas.
+- RF-34: SI el texto tiene menos de 2 o más de 2000 caracteres, o el alias más de 40, ENTONCES EL SISTEMA rechazará el comentario indicando el motivo.
+- RF-35: SI una misma IP envía más de 5 comentarios en 10 minutos, ENTONCES EL SISTEMA rechazará los siguientes hasta que pase la ventana.
+- RF-36: SI el campo trampa llega relleno, ENTONCES EL SISTEMA responderá como si aceptara el comentario, sin guardarlo.
+- RF-37: CUANDO quien comentó lo borre con su token, EL SISTEMA lo marcará `deleted`; nadie más podrá borrarlo.
+- RF-38: EL SISTEMA no permitirá votar el propio comentario; repetir el mismo voto lo retira.
+- RF-39: EL SISTEMA guardará la IP solo como hash con sal secreta, nunca en claro.
+
+**Moderación automática a cuarentena:** más de un enlace, una palabra de la lista de `banned-words.ts`,
+texto mayormente en mayúsculas (más de 20 letras y más del 70 % mayúsculas) o un carácter repetido 8 veces seguidas.
+Las respuestas a un comentario en cuarentena tampoco se muestran.
 
 ## Criterios de aceptación
 

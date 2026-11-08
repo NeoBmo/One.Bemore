@@ -29,7 +29,7 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | T8 | Archivo con búsqueda y filtro | `feat/site-pages` | RF-12 a RF-15 | implementada |
 | T9 | Artículo, anotación y series | `feat/site-pages` | RF-05 a RF-10, RF-22 | implementada |
 | T10 | Sobre mí, 404, RSS y redirección | `feat/site-pages` | RF-16, RF-17 | implementada |
-| T11 | Dominio de comentarios con tests | `feat/comments` | RF-25 a RF-31 | pendiente |
+| T11 | Dominio de comentarios con tests | `feat/comments` | RF-25 a RF-31, RF-34 a RF-39 | implementada |
 | T12 | Migración y RLS en Supabase | `feat/comments` | RF-33 | pendiente |
 | T13 | Adaptador, Actions y Turnstile | `feat/comments` | RF-26, RF-27, RF-33 | pendiente |
 | T14 | Interfaz de comentarios | `feat/comments` | RF-24, RF-28 a RF-32 | pendiente |
