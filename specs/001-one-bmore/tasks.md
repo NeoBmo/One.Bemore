@@ -66,3 +66,4 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | 2026-11-08 | T11 validada: revisión independiente con Opus APROBADO en la cuarta ronda, con 72 tests. Pendiente para T12: marca de autor del servidor contra suplantación con letras parecidas |
 | 2026-11-08 | Rediseño minimalista por feedback de los primeros lectores: una fuente, paleta mínima, inicio plegado, tarjetas, archivo con Ver más, viaje entre páginas. Rama `feat/minimal-redesign` |
 | 2026-11-08 | T12: proyecto Supabase `one-bmore-blog` (ref `zbwimwwkxnamyasyupxv`, sa-east-1, plan gratuito) creado con aprobación de Luis. Migración aplicada; 16 comprobaciones en la base pasan |
+| 2026-11-11 | T12: tercera migración (lockdown) tras la segunda revisión: permiso global de ejecución cerrado, hashes validados antes de los candados, limpieza global de eventos y candados en espacios separados. Verificado contra la base real |
