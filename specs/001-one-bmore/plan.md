@@ -66,7 +66,7 @@ Postgres, no en JavaScript, y el adaptador de Supabase debe usarlas.
 
 | Regla | Dónde se garantiza |
 |---|---|
-| Límite de 5 comentarios por IP en 10 min | RPC `post_comment`: `pg_advisory_xact_lock(hashtext(ip_hash))`, cuenta, valida la rama e inserta en una transacción |
+| Límite de 5 comentarios por IP en 10 min | RPC `post_comment`: `pg_advisory_xact_lock(1, hashtext(ip_hash))`, cuenta, valida la rama e inserta en una transacción |
 | Un voto por lector y comentario | `PRIMARY KEY (comment_id, voter_hash)` |
 | Repetir el voto lo retira | RPC `toggle_vote`: `DELETE ... WHERE value = v RETURNING`; si no borró, `INSERT ... ON CONFLICT DO UPDATE` |
 | Votos solo de +1 o -1 | `CHECK (value IN (-1, 1))` |
@@ -98,3 +98,15 @@ fila; nada nuevo en `public` queda abierto a `anon`.
   `mark_author_deleted`. Nunca escribir directo en las tablas.
 - `VoteError` debe incluir `rate-limited`, y el resultado de publicar, `invalid-input`.
 - El adaptador nunca reenvía al navegador `error.message` ni `error.details` de la base.
+
+**Cierre (migración `20261111000000_comments_lockdown`).**
+- `EXECUTE` ya no se concede por defecto a `PUBLIC` en ningún esquema. Toda función nueva necesita
+  su `grant execute on function ... to <rol>;` explícito, o fallará con «permission denied».
+- Espacios de candado reservados para comentarios: 1 (comentarios por IP), 2 (votos por IP) y
+  3 (un lector sobre un comentario). El orden es siempre 2 y luego 3.
+- Los hashes se validan antes de tomar candados. Los eventos de voto viejos se borran para todas
+  las IPs, pero solo cuando alguien vota: si nadie vota, quedan hasta el siguiente voto.
+
+**Riesgo residual aceptado.** Si Luis cierra una rama justo entre la comprobación y la escritura,
+una respuesta o un voto pueden entrar en ella. El efecto es el mismo que si hubieran llegado un
+instante antes, y `thread.ts` ya oculta la rama en cuarentena.
