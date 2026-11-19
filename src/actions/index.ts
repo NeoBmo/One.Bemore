@@ -32,13 +32,24 @@ const unavailable = (error: unknown): never => {
   throw new ActionError({ code: 'SERVICE_UNAVAILABLE', message: 'Los comentarios no están disponibles' });
 };
 
+// Nombres de las variables vacías, nunca sus valores: el registro dice cuál revisar.
+const missingNames = (vars: Record<string, string | undefined>) =>
+  Object.keys(vars).filter((name) => !vars[name]);
+
 const loadDeps = async (): Promise<CommentsDeps> => {
   const supabaseUrl = getSecret('SUPABASE_URL');
   const supabaseKey = getSecret('SUPABASE_SECRET_KEY');
   const turnstileSecret = getSecret('TURNSTILE_SECRET_KEY');
   const tokenSecret = getSecret('COMMENT_TOKEN_SECRET');
   const ipSalt = getSecret('IP_HASH_SALT');
-  if (!turnstileSecret || !tokenSecret || !ipSalt) throw new Error('faltan variables de comentarios');
+  if (!turnstileSecret || !tokenSecret || !ipSalt) {
+    const missing = missingNames({
+      TURNSTILE_SECRET_KEY: turnstileSecret,
+      COMMENT_TOKEN_SECRET: tokenSecret,
+      IP_HASH_SALT: ipSalt,
+    });
+    throw new Error(`faltan variables: ${missing.join(', ')}`);
+  }
   // Las claves de prueba de Turnstile aprueban o rechazan todo: en producción dejarían
   // pasar a cualquier bot sin aviso. Mejor «no disponibles» que abiertos.
   if (!import.meta.env.DEV && isTurnstileTestSecret(turnstileSecret)) {
@@ -49,7 +60,10 @@ const loadDeps = async (): Promise<CommentsDeps> => {
   let store;
   if (supabaseUrl && supabaseKey) store = new SupabaseCommentStore(supabaseUrl, supabaseKey);
   else if (import.meta.env.DEV) store = devStore ??= new InMemoryCommentStore();
-  else throw new Error('faltan SUPABASE_URL o SUPABASE_SECRET_KEY');
+  else {
+    const missing = missingNames({ SUPABASE_URL: supabaseUrl, SUPABASE_SECRET_KEY: supabaseKey });
+    throw new Error(`faltan variables: ${missing.join(', ')}`);
+  }
 
   // Se lee una vez por instancia; si falla, el siguiente intento vuelve a leer.
   knownPosts ??= getPosts()
