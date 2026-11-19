@@ -3,9 +3,9 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
 
-// La URL definitiva llega con el despliegue: SITE_URL la sobrescribe.
+// URL pública del Worker en Cloudflare. Con un dominio propio, SITE_URL la sobrescribe.
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://one-bmore-blog.workers.dev',
+  site: process.env.SITE_URL || 'https://one-bemore.neobmo.workers.dev',
   integrations: [mdx(), sitemap()],
   redirects: { '/about': '/sobre-mi/' },
   // El tema por variables deja los colores del código en manos de prose.css.
