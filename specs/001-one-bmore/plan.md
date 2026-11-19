@@ -66,14 +66,14 @@ Postgres, no en JavaScript, y el adaptador de Supabase debe usarlas.
 
 | Regla | Dónde se garantiza |
 |---|---|
-| Límite de 5 comentarios por IP en 10 min | RPC `post_comment`: `pg_advisory_xact_lock(hashtext(ip_hash))`, cuenta, valida la rama e inserta en una transacción |
+| Límite de 5 comentarios por IP en 10 min | RPC `post_comment`: `pg_advisory_xact_lock(1, hashtext(ip_hash))`, cuenta, valida la rama e inserta en una transacción |
 | Un voto por lector y comentario | `PRIMARY KEY (comment_id, voter_hash)` |
 | Repetir el voto lo retira | RPC `toggle_vote`: `DELETE ... WHERE value = v RETURNING`; si no borró, `INSERT ... ON CONFLICT DO UPDATE` |
 | Votos solo de +1 o -1 | `CHECK (value IN (-1, 1))` |
 | Sin autovoto | `toggle_vote` compara `voter_hash` con `author_token_hash` e `ip_hash` del autor |
-| Límite de votos por IP | `toggle_vote`: 60 votos por IP en 10 min |
+| Límite de votos por IP | `toggle_vote`: 60 intentos por IP en 10 min, contados en `comment_vote_events` antes de leer el comentario |
 | Estados válidos | `CHECK (status IN ('visible','quarantined','hidden','deleted'))` |
-| Padre del mismo artículo | Clave foránea compuesta `(parent_id, post_slug)` → `(id, post_slug)` |
+| Padre del mismo artículo | Clave foránea compuesta `(parent_id, post_slug)` → `(id, post_slug)` con `on delete restrict`: se modera por estado, nunca borrando filas |
 | Longitud del texto | `CHECK (char_length(body) BETWEEN 2 AND 2000)`, en puntos de código como el dominio |
 | Puntuación | Vista con la suma de votos por comentario: `listByPost` devuelve `scores`, nunca los `voter_hash` |
 | Acceso | RLS activo y sin políticas públicas; solo la clave secreta del servidor escribe |
@@ -87,3 +87,26 @@ sin haber comentado pide un token a una acción protegida por Turnstile.
 **Riesgo residual aceptado.** Un bot que rellena el campo trampa recibe siempre éxito, así que
 tras 5 envíos podría notar que no lo frena el límite por IP. Igualar ese comportamiento
 exigiría guardar los envíos trampa; se decide no guardarlos.
+
+**Endurecimiento aplicado (migración `20261108010000_comments_hardening`).** Los límites son constantes
+dentro de las funciones, no parámetros; un comentario solo nace `visible` o `quarantined`; las
+violaciones de restricciones se traducen a códigos (`invalid-parent`, `invalid-input`) sin copiar la
+fila; nada nuevo en `public` queda abierto a `anon`.
+
+**Obligaciones de T13 (adaptador de Supabase).**
+- `CommentStore` necesita operaciones atómicas que llamen a `post_comment`, `toggle_vote` y
+  `mark_author_deleted`. Nunca escribir directo en las tablas.
+- `VoteError` debe incluir `rate-limited`, y el resultado de publicar, `invalid-input`.
+- El adaptador nunca reenvía al navegador `error.message` ni `error.details` de la base.
+
+**Cierre (migración `20261111000000_comments_lockdown`).**
+- `EXECUTE` ya no se concede por defecto a `PUBLIC` en ningún esquema. Toda función nueva necesita
+  su `grant execute on function ... to <rol>;` explícito, o fallará con «permission denied».
+- Espacios de candado reservados para comentarios: 1 (comentarios por IP), 2 (votos por IP) y
+  3 (un lector sobre un comentario). El orden es siempre 2 y luego 3.
+- Los hashes se validan antes de tomar candados. Los eventos de voto viejos se borran para todas
+  las IPs, pero solo cuando alguien vota: si nadie vota, quedan hasta el siguiente voto.
+
+**Riesgo residual aceptado.** Si Luis cierra una rama justo entre la comprobación y la escritura,
+una respuesta o un voto pueden entrar en ella. El efecto es el mismo que si hubieran llegado un
+instante antes, y `thread.ts` ya oculta la rama en cuarentena.
