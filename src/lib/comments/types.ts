@@ -42,6 +42,39 @@ export interface Vote {
   value: 1 | -1;
 }
 
+// Lo que el servicio entrega para publicar. El id y la fecha los pone el almacén.
+export interface NewComment {
+  postSlug: string;
+  parentId: string | null;
+  alias: string;
+  body: string;
+  status: 'visible' | 'quarantined';
+  authorTokenHash: string;
+  ipHash: string;
+}
+
+export type InsertError = 'rate-limited' | 'invalid-parent' | 'too-deep' | 'invalid-input';
+
+export type InsertResult = { ok: true; id: string } | { ok: false; error: InsertError };
+
+export type VoteOutcome = 'ok' | 'rate-limited' | 'not-found' | 'own-comment' | 'invalid-vote';
+
+export interface VoteRequest {
+  commentId: string;
+  voterHash: string;
+  ipHash: string;
+  value: 1 | -1;
+}
+
+// Los datos no responden: la base de datos cayó, tardó demasiado o devolvió algo
+// inesperado. Su mensaje es para los registros del servidor, nunca para el navegador.
+export class CommentsUnavailableError extends Error {
+  constructor(reason: string) {
+    super(`Comentarios no disponibles: ${reason}`);
+    this.name = 'CommentsUnavailableError';
+  }
+}
+
 // Lo único que recibe el navegador: sin hashes, sin IP y sin texto de lo retirado.
 export interface PublicComment {
   id: string;
@@ -61,17 +94,17 @@ export interface PublicComment {
   replies: PublicComment[];
 }
 
+// Cada escritura es una sola operación atómica. Leer y luego escribir desde JavaScript
+// pierde contra peticiones simultáneas, así que las reglas que deben resistirlas
+// (límites, rama abierta, autovoto) las aplica el almacén, como las funciones de Postgres.
 export interface CommentStore {
   // Devuelve la suma de votos por comentario, no los votos: el servidor nunca ve
   // quién votó qué al pintar el hilo.
   listByPost(postSlug: string): Promise<{ comments: StoredComment[]; scores: Record<string, number> }>;
-  getById(id: string): Promise<StoredComment | undefined>;
-  insert(comment: StoredComment): Promise<void>;
-  setStatus(id: string, status: CommentStatus): Promise<void>;
-  // Atómico en la base de datos: solo marca si el hash del autor coincide.
+  // Límite por IP, padre del mismo artículo, rama abierta y profundidad, en un paso.
+  postComment(comment: NewComment): Promise<InsertResult>;
+  // Límite de votos por IP, rama abierta, sin autovoto; repetir el mismo valor lo retira.
+  toggleVote(vote: VoteRequest): Promise<VoteOutcome>;
+  // Solo marca si el hash del autor coincide.
   markAuthorDeleted(id: string, authorTokenHash: string): Promise<boolean>;
-  countRecentByIp(ipHash: string, sinceIso: string): Promise<number>;
-  getVote(commentId: string, voterHash: string): Promise<Vote | undefined>;
-  saveVote(vote: Vote): Promise<void>;
-  deleteVote(commentId: string, voterHash: string): Promise<void>;
 }
