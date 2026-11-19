@@ -69,3 +69,4 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | 2026-11-11 | T12: tercera migración (lockdown) tras la segunda revisión: permiso global de ejecución cerrado, hashes validados antes de los candados, limpieza global de eventos y candados en espacios separados. Verificado contra la base real |
 | 2026-11-11 | T12 validada: revisión independiente con Opus APROBADO tras tres migraciones. Siguiente: T13, adaptador de Supabase y acciones del servidor |
 | 2026-11-18 | T13 implementada en `feat/comments-server` con claves de prueba de Turnstile: almacén atómico, adaptador REST de Supabase, 5 acciones y 87 tests. Supabase estaba pausado por inactividad y se reactivó |
+| 2026-11-18 | T13: revisión independiente con Opus APROBADO en la segunda ronda (89 tests). Espera la aprobación de Luis para pasar a `validada`. Pendiente para T16: probar REST con la clave `sb_secret_` real antes de desplegar |
