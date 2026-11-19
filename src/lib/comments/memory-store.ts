@@ -1,9 +1,32 @@
-import type { CommentStatus, CommentStore, StoredComment, Vote } from './types.ts';
+import { isHash } from './token.ts';
+import {
+  LIMITS,
+  isShown,
+  type CommentStatus,
+  type CommentStore,
+  type InsertResult,
+  type NewComment,
+  type StoredComment,
+  type Vote,
+  type VoteOutcome,
+  type VoteRequest,
+} from './types.ts';
+
+// Deben coincidir con las constantes de toggle_vote en la migración de Supabase.
+const VOTE_RATE_MAX = 60;
+const VOTE_RATE_WINDOW_MS = 10 * 60_000;
+// El mismo tope que comment_open_depth: nunca recorre sin fin.
+const DEPTH_GUARD = 50;
 
 // Almacén en memoria con el mismo contrato que Supabase: sirve para tests y desarrollo local.
+// Cada método termina sin esperar a nada intermedio, así que en un solo hilo es atómico,
+// igual que una función de Postgres dentro de su transacción.
 export class InMemoryCommentStore implements CommentStore {
   comments: StoredComment[] = [];
   votes: Vote[] = [];
+  voteEvents: { ipHash: string; at: number }[] = [];
+  now: () => Date = () => new Date();
+  private sequence = 0;
 
   async listByPost(postSlug: string) {
     const comments = this.comments.filter((comment) => comment.postSlug === postSlug);
@@ -16,40 +39,73 @@ export class InMemoryCommentStore implements CommentStore {
     return { comments: [...comments], scores };
   }
 
-  async getById(id: string) {
-    return this.comments.find((comment) => comment.id === id);
+  async postComment(comment: NewComment): Promise<InsertResult> {
+    if (!isHash(comment.ipHash) || !isHash(comment.authorTokenHash)) return { ok: false, error: 'invalid-input' };
+
+    const now = this.now();
+    const since = new Date(now.getTime() - LIMITS.rateWindowMs).toISOString();
+    const recent = this.comments.filter((item) => item.ipHash === comment.ipHash && item.createdAt > since).length;
+    if (recent >= LIMITS.rateMax) return { ok: false, error: 'rate-limited' };
+
+    if (comment.parentId !== null) {
+      const parent = this.find(comment.parentId);
+      if (!parent || parent.postSlug !== comment.postSlug) return { ok: false, error: 'invalid-parent' };
+      const depth = this.openDepth(parent.id);
+      if (depth === undefined) return { ok: false, error: 'invalid-parent' };
+      if (depth + 1 > LIMITS.maxDepth) return { ok: false, error: 'too-deep' };
+    }
+
+    const id = `m${++this.sequence}`;
+    this.comments.push({ ...comment, id, authorDeleted: false, createdAt: now.toISOString() });
+    return { ok: true, id };
   }
 
-  async insert(comment: StoredComment) {
-    this.comments.push(comment);
-  }
+  async toggleVote({ commentId, voterHash, ipHash, value }: VoteRequest): Promise<VoteOutcome> {
+    if ((value !== 1 && value !== -1) || !isHash(ipHash) || !isHash(voterHash)) return 'invalid-vote';
 
-  async setStatus(id: string, status: CommentStatus) {
-    const comment = this.comments.find((item) => item.id === id);
-    if (comment) comment.status = status;
+    // Cada intento cuenta, salga como salga: el límite va antes de leer el comentario.
+    const now = this.now().getTime();
+    this.voteEvents = this.voteEvents.filter((event) => event.at > now - VOTE_RATE_WINDOW_MS);
+    if (this.voteEvents.filter((event) => event.ipHash === ipHash).length >= VOTE_RATE_MAX) return 'rate-limited';
+    this.voteEvents.push({ ipHash, at: now });
+
+    const comment = this.find(commentId);
+    if (!comment || this.openDepth(commentId) === undefined) return 'not-found';
+    if (comment.authorTokenHash === voterHash || comment.ipHash === ipHash) return 'own-comment';
+
+    const current = this.votes.find((vote) => vote.commentId === commentId && vote.voterHash === voterHash);
+    this.votes = this.votes.filter((vote) => vote !== current);
+    if (current?.value !== value) this.votes.push({ commentId, voterHash, value });
+    return 'ok';
   }
 
   async markAuthorDeleted(id: string, authorTokenHash: string) {
-    const comment = this.comments.find((item) => item.id === id && item.authorTokenHash === authorTokenHash);
+    const comment = this.comments.find(
+      (item) => item.id === id && item.authorTokenHash === authorTokenHash && !item.authorDeleted,
+    );
     if (!comment) return false;
     comment.authorDeleted = true;
     return true;
   }
 
-  async countRecentByIp(ipHash: string, sinceIso: string) {
-    return this.comments.filter((comment) => comment.ipHash === ipHash && comment.createdAt >= sinceIso).length;
+  // Lo que Luis hace desde el Table Editor de Supabase. No es parte del contrato.
+  setStatus(id: string, status: CommentStatus) {
+    const comment = this.find(id);
+    if (comment) comment.status = status;
   }
 
-  async getVote(commentId: string, voterHash: string) {
-    return this.votes.find((vote) => vote.commentId === commentId && vote.voterHash === voterHash);
+  find(id: string) {
+    return this.comments.find((comment) => comment.id === id);
   }
 
-  async saveVote(vote: Vote) {
-    await this.deleteVote(vote.commentId, vote.voterHash);
-    this.votes.push(vote);
-  }
-
-  async deleteVote(commentId: string, voterHash: string) {
-    this.votes = this.votes.filter((vote) => !(vote.commentId === commentId && vote.voterHash === voterHash));
+  // Profundidad si toda la rama se muestra; undefined si algún ancestro está cerrado.
+  private openDepth(id: string): number | undefined {
+    let current = this.find(id);
+    for (let depth = 0; current && depth <= DEPTH_GUARD; depth += 1) {
+      if (!isShown(current)) return undefined;
+      if (current.parentId === null) return depth;
+      current = this.find(current.parentId);
+    }
+    return undefined;
   }
 }

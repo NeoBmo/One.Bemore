@@ -6,7 +6,7 @@
 Astro Actions, atiende comentarios en Cloudflare Workers y habla con Supabase.
 
 **Stack:** Astro 7.4, `@astrojs/mdx`, `@astrojs/rss`, `@astrojs/sitemap`; en
-comentarios, `@astrojs/cloudflare` 14, `wrangler` y `@supabase/supabase-js`.
+comentarios, `@astrojs/cloudflare` 14 y `wrangler`. Supabase se usa por su API REST con `fetch`, sin cliente.
 
 ## Restricciones globales
 
@@ -28,6 +28,11 @@ comentarios, `@astrojs/cloudflare` 14, `wrangler` y `@supabase/supabase-js`.
 | Fecha de edición por git | Luis no debe recordar nada. Trampa: un clon parcial la falsea, por eso el build ejecuta `git fetch --unshallow` si aplica |
 | Series en artículos, sin colección de cursos | Reutiliza diseño y comentarios |
 | `Comment store` como interfaz | Tests con memoria, producción con Supabase |
+| `Comment store` atómico | Cada escritura es una sola llamada (`postComment`, `toggleVote`, `markAuthorDeleted`); las reglas que deben resistir peticiones simultáneas viven en el almacén, como en Postgres |
+| Supabase con `fetch` en vez de `@supabase/supabase-js` | Son cuatro llamadas REST; una dependencia menos en el Worker. La clave `sb_secret_…` va en `apikey`, nunca como `Bearer` |
+| Variables con `astro:env` y `getSecret()` | El esquema vive en `astro.config.mjs`; se leen en cada petición, nunca se copian al build |
+| Adaptador con `imageService: 'compile'` y `session: false` | El blog no usa Cloudflare Images ni sesiones; así el Worker no pide servicios extra |
+| Almacén en memoria solo en desarrollo | Sin `SUPABASE_URL` y con `astro dev`, los comentarios viven en memoria; en producción faltar Supabase da «no disponibles» |
 
 ## Mapa de archivos
 
@@ -44,7 +49,11 @@ comentarios, `@astrojs/cloudflare` 14, `wrangler` y `@supabase/supabase-js`.
 | `src/pages/**` | Rutas |
 | `src/scripts/archive-filter.ts` | Buscador y filtro (RF-13 a RF-15) |
 | `src/lib/comments/**` | Dominio de comentarios (rama `feat/comments`) |
-| `src/actions/index.ts` | Superficie de servidor |
+| `src/actions/index.ts` | Superficie de servidor: `comments.{list,post,vote,remove,readerToken}` |
+| `src/lib/comments/server.ts` | Une dominio, IP y Turnstile; sin Astro, se prueba con Node |
+| `src/lib/comments/supabase-store.ts` | Adaptador REST; solo llama a las funciones atómicas |
+| `src/lib/comments/turnstile.ts` | Verificación del desafío con Cloudflare |
+| `wrangler.jsonc`, `.dev.vars.example` | Worker `one-bmore-blog` y variables locales de prueba |
 | `supabase/migrations/**` | Esquema y RLS |
 | `tests/*.test.mjs` | Lógica pura |
 
@@ -110,3 +119,23 @@ fila; nada nuevo en `public` queda abierto a `anon`.
 **Riesgo residual aceptado.** Si Luis cierra una rama justo entre la comprobación y la escritura,
 una respuesta o un voto pueden entrar en ella. El efecto es el mismo que si hubieran llegado un
 instante antes, y `thread.ts` ya oculta la rama en cuarentena.
+
+## Servidor de comentarios (T13)
+
+**Contrato de las acciones.** Toda respuesta del dominio llega como datos: `{ ok: true, ... }` o
+`{ ok: false, error }` con un código (`challenge-failed`, `rate-limited`, `invalid-parent`, etc.).
+Una falla de infraestructura (Supabase o Turnstile caídos, variables ausentes, respuesta
+inesperada) sale siempre como `ActionError` `SERVICE_UNAVAILABLE` con el mismo texto; el detalle
+va solo a `console.error`, y nunca incluye el mensaje de Postgres.
+
+**Orden al publicar.** Primero lo que no gasta el desafío (texto y artículo), luego Turnstile, y al
+final el dominio. Votar y borrar no piden desafío: exigen un token firmado, que solo se obtiene
+comentando o con `readerToken`, que sí lo pide.
+
+**Claves de prueba de Turnstile.** `1x0000000000000000000000000000000AA` aprueba cualquier código
+y `2x0000000000000000000000000000000AA` rechaza todos. Sirven en local; en producción el Worker
+necesita la clave secreta real de Luis.
+
+**Riesgo abierto: pausa del plan gratuito.** Supabase pausa el proyecto tras 7 días sin
+actividad (pasó el 2026-11-18). Mientras esté pausado, los comentarios quedan «no disponibles» y
+el artículo sigue legible (RF-32), pero reactivarlo es manual. Pendiente de decidir con Luis.

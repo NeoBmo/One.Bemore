@@ -1,0 +1,13 @@
+# Copia este archivo como .dev.vars para desarrollar en local. .dev.vars no se sube a git.
+# En producción estos valores van en Cloudflare: Worker → Settings → Variables and Secrets.
+
+# Sin SUPABASE_URL, en desarrollo los comentarios viven en memoria y se borran al reiniciar.
+# SUPABASE_URL=https://<ref>.supabase.co
+# SUPABASE_SECRET_KEY=sb_secret_...
+
+# Clave secreta de prueba de Turnstile: siempre aprueba. Nunca la uses en producción.
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Al menos 32 caracteres aleatorios cada uno.
+COMMENT_TOKEN_SECRET=
+IP_HASH_SALT=
