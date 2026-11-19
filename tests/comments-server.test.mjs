@@ -82,6 +82,18 @@ test('una red caída o una respuesta ilegible quedan como no disponible', async 
   await assert.rejects(() => garbage.toggleVote({ commentId: UUID, voterHash: HASH_A, ipHash: HASH_B, value: 1 }), CommentsUnavailableError);
 });
 
+test('llama a fetch sin el almacén como this, como exige Cloudflare Workers', async () => {
+  // Imita a workerd: fetch rechaza cualquier `this` que no sea el global.
+  const strictFetch = function () {
+    if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
+    return Promise.resolve(Response.json([]));
+  };
+  const store = new SupabaseCommentStore('https://demo.supabase.co', 'k', strictFetch);
+  const { comments, scores } = await store.listByPost('habitos');
+  assert.deepEqual(comments, []);
+  assert.deepEqual(Object.keys(scores), []);
+});
+
 test('un id que no es uuid se responde sin llamar a la base', async () => {
   const { store, fetch } = supabase(() => ({ json: 'ok' }));
   assert.deepEqual(await store.postComment(newComment({ parentId: 'c1' })), { ok: false, error: 'invalid-parent' });

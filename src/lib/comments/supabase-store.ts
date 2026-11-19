@@ -68,7 +68,9 @@ export class SupabaseCommentStore implements CommentStore {
   constructor(url: string, secretKey: string, fetchFn: typeof fetch = fetch) {
     this.baseUrl = `${url.replace(/\/+$/, '')}/rest/v1`;
     this.secretKey = secretKey;
-    this.fetchFn = fetchFn;
+    // Envuelto a propósito: `this.fetchFn(...)` llamaría a fetch con este objeto como
+    // `this`, y Cloudflare Workers lo rechaza con «Illegal invocation». Node no lo nota.
+    this.fetchFn = (input, init) => fetchFn(input, init);
   }
 
   private async request(path: string, init: { method?: string; body?: unknown } = {}): Promise<unknown> {
@@ -85,8 +87,10 @@ export class SupabaseCommentStore implements CommentStore {
         body: init.body === undefined ? undefined : JSON.stringify(init.body),
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
-    } catch {
-      throw new CommentsUnavailableError('sin respuesta de Supabase');
+    } catch (error) {
+      // Solo el tipo de error (TimeoutError, TypeError…): basta para el registro y no trae datos.
+      const kind = error instanceof Error ? error.name : 'desconocido';
+      throw new CommentsUnavailableError(`sin respuesta de Supabase (${kind})`);
     }
     // El cuerpo de un error puede traer el mensaje de Postgres: se descarta sin leerlo.
     if (!response.ok) {
