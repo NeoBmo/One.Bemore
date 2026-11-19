@@ -53,7 +53,7 @@ comentarios, `@astrojs/cloudflare` 14 y `wrangler`. Supabase se usa por su API R
 | `src/lib/comments/server.ts` | Une dominio, IP y Turnstile; sin Astro, se prueba con Node |
 | `src/lib/comments/supabase-store.ts` | Adaptador REST; solo llama a las funciones atómicas |
 | `src/lib/comments/turnstile.ts` | Verificación del desafío con Cloudflare |
-| `wrangler.jsonc`, `.dev.vars.example` | Worker `one-bmore-blog` y variables locales de prueba |
+| `wrangler.jsonc`, `.dev.vars.example` | Worker `one-bemore` (el nombre del panel de Cloudflare) y variables locales de prueba |
 | `supabase/migrations/**` | Esquema y RLS |
 | `tests/*.test.mjs` | Lógica pura |
 
