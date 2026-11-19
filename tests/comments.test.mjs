@@ -16,7 +16,6 @@ const IP_C = 'c'.repeat(64);
 const SALT = 's'.repeat(32);
 let counter = 0;
 const ctx = (extra = {}) => ({
-  now: NOW,
   ipHash: IP_A,
   tokenSecret: SECRET,
   knownPosts: new Set(['habitos']),
@@ -213,7 +212,7 @@ test('una rama en cuarentena queda cerrada: ni respuestas ni votos', async () =>
   const store = new InMemoryCommentStore();
   const root = await postComment(store, draft(), ctx());
   const child = await postComment(store, draft({ parentId: root.id }), ctx({ ipHash: IP_B }));
-  await store.setStatus(root.id, 'quarantined');
+  store.setStatus(root.id, 'quarantined');
   assert.equal((await postComment(store, draft({ parentId: child.id }), ctx({ ipHash: IP_C }))).error, 'invalid-parent');
   assert.equal((await vote(store, { commentId: child.id, value: 1, token: await reader(), ipHash: IP_C })).error, 'not-found');
 });
@@ -230,11 +229,12 @@ test('las ramas tienen un tope de profundidad', async () => {
 
 test('limita a 5 comentarios por IP cada 10 minutos (RF-35)', async () => {
   const store = new InMemoryCommentStore();
+  store.now = () => NOW;
   for (let i = 0; i < 5; i += 1) assert.equal((await postComment(store, draft(), ctx())).ok, true);
   assert.equal((await postComment(store, draft(), ctx())).error, 'rate-limited');
   assert.equal((await postComment(store, draft(), ctx({ ipHash: IP_B }))).ok, true);
-  const later = new Date(NOW.getTime() + 11 * 60_000);
-  assert.equal((await postComment(store, draft(), ctx({ now: later }))).ok, true);
+  store.now = () => new Date(NOW.getTime() + 11 * 60_000);
+  assert.equal((await postComment(store, draft(), ctx())).ok, true);
 });
 
 // --- Votos (RF-29, RF-30, RF-38) ---
@@ -278,7 +278,7 @@ test('solo quien comentó puede borrar, y deja de mostrarse', async () => {
   const del = (token) => deleteOwnComment(store, { commentId: author.id, token, tokenSecret: SECRET });
   assert.equal((await del(await reader())).error, 'forbidden');
   assert.equal((await del(author.token)).ok, true);
-  assert.equal((await store.getById(author.id)).authorDeleted, true);
+  assert.equal(store.find(author.id).authorDeleted, true);
   assert.deepEqual(buildThread(store.comments, {}), []);
 });
 
@@ -286,8 +286,8 @@ test('lo que el autor borró en revisión nunca se publica, aunque Luis lo aprue
   const store = new InMemoryCommentStore();
   const author = await postComment(store, draft({ body: 'IDIOTA' }), ctx());
   assert.equal((await deleteOwnComment(store, { commentId: author.id, token: author.token, tokenSecret: SECRET })).ok, true);
-  assert.equal((await store.getById(author.id)).status, 'quarantined');
-  await store.setStatus(author.id, 'visible');
+  assert.equal(store.find(author.id).status, 'quarantined');
+  store.setStatus(author.id, 'visible');
   assert.deepEqual(buildThread(store.comments, {}), []);
 });
 

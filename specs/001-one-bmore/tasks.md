@@ -31,7 +31,7 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | T10 | Sobre mí, 404, RSS y redirección | `feat/site-pages` | RF-16, RF-17 | implementada |
 | T11 | Dominio de comentarios con tests | `feat/comments` | RF-25 a RF-31, RF-34 a RF-39 | validada |
 | T12 | Migración y RLS en Supabase | `feat/comments-backend` | RF-33 | validada |
-| T13 | Adaptador, Actions y Turnstile | `feat/comments` | RF-26, RF-27, RF-33 | pendiente |
+| T13 | Adaptador, Actions y Turnstile | `feat/comments-server` | RF-26, RF-27, RF-33 | validada |
 | T14 | Interfaz de comentarios | `feat/comments` | RF-24, RF-28 a RF-32 | pendiente |
 | T15 | Puerta de calidad y revisión independiente | `chore/launch` | Aceptación | pendiente |
 | T16 | Renombrar repositorio y desplegar | `chore/launch` | Aceptación | pendiente |
@@ -42,7 +42,7 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 |---|---|
 | T5 | Revisar en navegador la sensación del fondo y el movimiento |
 | T12 | Aprobar el proyecto nuevo de Supabase |
-| T13 | Crear cuenta de Cloudflare y el widget de Turnstile |
+| T16 | Crear cuenta de Cloudflare y el widget de Turnstile con el dominio final |
 | T16 | Aprobar push, PR, renombre y despliegue |
 | Cuando exista | Enviar el dibujo de su hija para el logo |
 
@@ -68,3 +68,6 @@ Cada rama nace de la anterior y tendrá su PR hacia `main`, en este orden.
 | 2026-11-08 | T12: proyecto Supabase `one-bmore-blog` (ref `zbwimwwkxnamyasyupxv`, sa-east-1, plan gratuito) creado con aprobación de Luis. Migración aplicada; 16 comprobaciones en la base pasan |
 | 2026-11-11 | T12: tercera migración (lockdown) tras la segunda revisión: permiso global de ejecución cerrado, hashes validados antes de los candados, limpieza global de eventos y candados en espacios separados. Verificado contra la base real |
 | 2026-11-11 | T12 validada: revisión independiente con Opus APROBADO tras tres migraciones. Siguiente: T13, adaptador de Supabase y acciones del servidor |
+| 2026-11-18 | T13 implementada en `feat/comments-server` con claves de prueba de Turnstile: almacén atómico, adaptador REST de Supabase, 5 acciones y 87 tests. Supabase estaba pausado por inactividad y se reactivó |
+| 2026-11-18 | T13: revisión independiente con Opus APROBADO en la segunda ronda (89 tests). Espera la aprobación de Luis para pasar a `validada`. Pendiente para T16: probar REST con la clave `sb_secret_` real antes de desplegar |
+| 2026-11-19 | T13 validada con la aprobación de Luis. Siguiente: T14, interfaz de comentarios |
