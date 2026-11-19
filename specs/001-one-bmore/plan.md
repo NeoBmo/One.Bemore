@@ -136,6 +136,26 @@ comentando o con `readerToken`, que sí lo pide.
 y `2x0000000000000000000000000000000AA` rechaza todos. Sirven en local; en producción el Worker
 necesita la clave secreta real de Luis.
 
+**Claves de prueba fuera de producción.** Si el Worker no corre con `astro dev` y
+`TURNSTILE_SECRET_KEY` es una clave de prueba (`1x…`, `2x…` o `3x…`), los comentarios quedan «no
+disponibles» en vez de abiertos a bots. Verificado con el Worker compilado.
+
+**Verificado contra la base real (2026-11-18), como `service_role` y sin dejar filas.** Permisos de
+lectura en `comments` y `comment_scores`, ejecución de las tres funciones, y formas de respuesta:
+`post_comment` → `{ok, id|error}`, `toggle_vote` → texto, `mark_author_deleted` → booleano, vista →
+`{comment_id, score}`. **Sin verificar:** la llamada REST con la clave `sb_secret_…` en `apikey`,
+porque esa clave solo la tiene Luis. Se comprueba al desplegar (T16) o poniéndola en `.dev.vars`.
+
+**Riesgos aceptados.**
+- `list` y `remove` no tienen límite de frecuencia propio; `list` hace 1 + N/100 consultas.
+  Si alguien lo martilla, gasta cuota gratuita. Mitigación futura: caché corta o `ratelimits`.
+- No se compara el `hostname` que devuelve Turnstile: la restricción de dominios del widget
+  en Cloudflare cumple esa función.
+- Más de 1000 comentarios en un artículo: los nuevos no se mostrarían. Queda un aviso en el
+  registro del Worker.
+- Desplegar siempre con `npx wrangler deploy` sin `-c`: usa la configuración que genera el build
+  (`dist/server/wrangler.json`). El build copia `.dev.vars` a `dist/server/`, que no se sirve.
+
 **Riesgo abierto: pausa del plan gratuito.** Supabase pausa el proyecto tras 7 días sin
 actividad (pasó el 2026-11-18). Mientras esté pausado, los comentarios quedan «no disponibles» y
 el artículo sigue legible (RF-32), pero reactivarlo es manual. Pendiente de decidir con Luis.

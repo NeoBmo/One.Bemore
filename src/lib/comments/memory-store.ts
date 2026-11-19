@@ -21,6 +21,8 @@ const DEPTH_GUARD = 50;
 // Almacén en memoria con el mismo contrato que Supabase: sirve para tests y desarrollo local.
 // Cada método termina sin esperar a nada intermedio, así que en un solo hilo es atómico,
 // igual que una función de Postgres dentro de su transacción.
+// Diferencias aceptadas, que el dominio no alcanza porque valida antes: no revisa longitudes
+// (el CHECK de Postgres sí) y acepta ids que no son uuid (Supabase los responde sin consultar).
 export class InMemoryCommentStore implements CommentStore {
   comments: StoredComment[] = [];
   votes: Vote[] = [];
@@ -40,6 +42,8 @@ export class InMemoryCommentStore implements CommentStore {
   }
 
   async postComment(comment: NewComment): Promise<InsertResult> {
+    // Igual que post_comment: un estado inicial distinto es un error de programación.
+    if (comment.status !== 'visible' && comment.status !== 'quarantined') throw new Error('estado inicial no válido');
     if (!isHash(comment.ipHash) || !isHash(comment.authorTokenHash)) return { ok: false, error: 'invalid-input' };
 
     const now = this.now();

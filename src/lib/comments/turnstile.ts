@@ -7,6 +7,10 @@ const TIMEOUT_MS = 5000;
 // Cloudflare documenta códigos de hasta 2048 caracteres.
 const MAX_RESPONSE_LENGTH = 2048;
 
+// Claves secretas de prueba que publica Cloudflare: 1x aprueba todo, 2x rechaza todo y
+// 3x responde «código ya usado». Sirven en local; en producción abrirían la puerta a los bots.
+export const isTurnstileTestSecret = (secret: string): boolean => /^[123]x0+AA$/.test(secret.trim());
+
 export type ChallengeVerifier = (response: unknown, remoteIp: string) => Promise<boolean>;
 
 export const createTurnstileVerifier =

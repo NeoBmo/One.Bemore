@@ -33,11 +33,11 @@ interface CommentRow {
   status: string;
   author_deleted: boolean;
   author_token_hash: string;
-  ip_hash: string;
   created_at: string;
 }
 
-const COMMENT_COLUMNS = 'id,post_slug,parent_id,alias,body,status,author_deleted,author_token_hash,ip_hash,created_at';
+// Sin ip_hash: pintar el hilo no la necesita, así que ni siquiera sale de la base.
+const COMMENT_COLUMNS = 'id,post_slug,parent_id,alias,body,status,author_deleted,author_token_hash,created_at';
 
 const isStatus = (value: unknown): value is StoredComment['status'] =>
   (COMMENT_STATUSES as readonly unknown[]).includes(value);
@@ -53,7 +53,8 @@ const toStored = (row: CommentRow): StoredComment => {
     status: row.status,
     authorDeleted: row.author_deleted,
     authorTokenHash: row.author_token_hash,
-    ipHash: row.ip_hash,
+    // No se lee al listar (ver COMMENT_COLUMNS). Las reglas por IP viven en las funciones SQL.
+    ipHash: '',
     createdAt: row.created_at,
   };
 };
@@ -113,6 +114,8 @@ export class SupabaseCommentStore implements CommentStore {
     const rows = await this.request(`/comments?${query}`);
     if (!Array.isArray(rows)) throw new CommentsUnavailableError('lista de comentarios inesperada');
     const comments = (rows as CommentRow[]).map(toStored);
+    // Pasado el tope, lo más nuevo no se mostraría: queda registrado para subirlo a tiempo.
+    if (comments.length >= MAX_COMMENTS) console.warn(`[comments] ${postSlug} llegó al tope de ${MAX_COMMENTS} comentarios`);
 
     const scores: Record<string, number> = Object.create(null);
     for (let i = 0; i < comments.length; i += SCORE_BATCH) {

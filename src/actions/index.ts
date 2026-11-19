@@ -12,7 +12,7 @@ import {
   type CommentsDeps,
 } from '../lib/comments/server.ts';
 import { SupabaseCommentStore } from '../lib/comments/supabase-store.ts';
-import { createTurnstileVerifier } from '../lib/comments/turnstile.ts';
+import { createTurnstileVerifier, isTurnstileTestSecret } from '../lib/comments/turnstile.ts';
 
 // Única superficie de servidor del sitio. Las acciones son públicas: cualquiera puede
 // llamarlas, así que todo se valida aquí y en el dominio, nunca solo en el navegador.
@@ -39,6 +39,11 @@ const loadDeps = async (): Promise<CommentsDeps> => {
   const tokenSecret = getSecret('COMMENT_TOKEN_SECRET');
   const ipSalt = getSecret('IP_HASH_SALT');
   if (!turnstileSecret || !tokenSecret || !ipSalt) throw new Error('faltan variables de comentarios');
+  // Las claves de prueba de Turnstile aprueban o rechazan todo: en producción dejarían
+  // pasar a cualquier bot sin aviso. Mejor «no disponibles» que abiertos.
+  if (!import.meta.env.DEV && isTurnstileTestSecret(turnstileSecret)) {
+    throw new Error('TURNSTILE_SECRET_KEY es una clave de prueba');
+  }
 
   // Sin Supabase configurado, solo en desarrollo: un almacén en memoria que se borra al reiniciar.
   let store;

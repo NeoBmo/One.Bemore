@@ -3,7 +3,7 @@ import test from 'node:test';
 import { InMemoryCommentStore } from '../src/lib/comments/memory-store.ts';
 import { castVote, listComments, removeComment, requestReaderToken, submitComment } from '../src/lib/comments/server.ts';
 import { SupabaseCommentStore } from '../src/lib/comments/supabase-store.ts';
-import { createTurnstileVerifier } from '../src/lib/comments/turnstile.ts';
+import { createTurnstileVerifier, isTurnstileTestSecret } from '../src/lib/comments/turnstile.ts';
 import { CommentsUnavailableError } from '../src/lib/comments/types.ts';
 
 const SECRET = 'k'.repeat(32);
@@ -155,6 +155,19 @@ test('Turnstile no llama a Cloudflare sin código y separa su caída de un recha
   for (const bad of [undefined, '', 'x'.repeat(2049), ['a']]) assert.equal(await verify(bad, '1.2.3.4'), false);
   assert.equal(calls, 0);
   await assert.rejects(() => verify('codigo', '1.2.3.4'), CommentsUnavailableError);
+});
+
+test('reconoce las claves de prueba de Turnstile para no usarlas en producción', () => {
+  for (const key of ['1x0000000000000000000000000000000AA', '2x0000000000000000000000000000000AA', ' 3x0000000000000000000000000000000AA ']) {
+    assert.equal(isTurnstileTestSecret(key), true, key);
+  }
+  assert.equal(isTurnstileTestSecret('0x4AAAAAAABkMYinukE8nzYS'), false);
+});
+
+test('al listar no se pide la IP del autor', async () => {
+  const { store, fetch } = supabase(() => ({ json: [] }));
+  await store.listByPost('habitos');
+  assert.equal(new URL(fetch.calls[0].url).searchParams.get('select').includes('ip_hash'), false);
 });
 
 // --- Capa de servidor ---
